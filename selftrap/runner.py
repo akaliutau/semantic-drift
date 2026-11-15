@@ -19,7 +19,7 @@ def request(folder,provider,model,prompt,label,m,tools=None):
     try:
         r=AdmissionJournal(folder/'calls').complete(label,provider,model,prompt,tools=tools or [],
             max_output_tokens=m.get('tokens',8000),timeout=m.get('seconds',150),retries=1,
-            tool_choice={'type':'function','name':tools[0]['name']} if tools else 'none')
+            tool_choice=m.get('tool_choice',{'type':'function','name':tools[0]['name']} if tools else 'none'))
         result={'status':r.raw.get('status'),'seconds':r.seconds,'tokens':(r.usage or {}).get('output_tokens')}
         if response_ok(r,model):
             text=r.calls[0]['arguments'] if tools and len(r.calls)==1 else r.text

@@ -31,6 +31,12 @@ Closed directions (15 November 2026)
    errors did not track own authorship. Self-specific gate failed; dropped.
    Source 978fa72; results runs/new-search/diagnostic-twins-1.
 
+8. Certified switch-game heuristic prediction: both targets committed the
+   exact greedy error. Gemma self forecast .60 vs peer .45; Qwen self .25 vs
+   peer .50. Declared two-target self-advantage gate failed. Forecast wording
+   also omitted forced tool_choice. Separate fresh contract study required.
+   Source bf33658; results runs/new-search/switch-selfprediction-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
