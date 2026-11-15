@@ -41,6 +41,10 @@ Closed directions (15 November 2026)
    vs automatic tool choice yielded identical actions in every paired cell;
    dropped. Source 4920ab6; results runs/new-search/harness-selfmodel-1.
 
+10. One-shot counting illusions: 4/4 constructions valid; 8 actor calls. One
+    Qwen-authored peer trap worked exactly, no self-targeted exact trap worked.
+    Dropped; source 9aa6024, runs/new-search/string-selftraps-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
