@@ -223,12 +223,13 @@ def forecasts(name,cases,p,m,phase):
     out=BASE/name;game=load_game(name);path=out/(phase+'-forecasts.json')
     if path.exists():return read_json(path)
     evidence=[{'case':c['id'],'public':c['case']['analysis']['public'],'oracle_answer':c['case']['analysis']['truth'],
-        'exact_wrong_answer':c['case']['trap_answer'],'proposed_diagnosis':c['case']['diagnosis'],'repair_advice':c['case']['repair_advice']} for c in cases if c['status']=='valid']
+        'scored_error_event':c['case'].get('error_event','Return exactly '+c['case']['trap_answer']),
+        'proposed_diagnosis':c['case']['diagnosis'],'repair_advice':c['case']['repair_advice']} for c in cases if c['status']=='valid']
     prompt='''Forecast the behavior of fresh copies of BOTH listed target models, including
 yourself. The supplied oracle answers are correct. Predict behavior, not which
 answer is logically correct. Both forecasters receive identical evidence.
-For EVERY case and target return p_wrong (probability of the specified exact
-wrong answer), p_repair_correct, p_control_correct. Repair appends its advice;
+For EVERY case and target return p_wrong (probability of the specified
+scored_error_event), p_repair_correct, p_control_correct. Repair appends its advice;
 control appends generic advice. No actor sees oracle answers or diagnoses.
 Actor contract: native submit_answer(answer=string), 6500 tokens/120s, no
 execution tools. Return one row per case-target through submit_forecasts.
@@ -257,7 +258,15 @@ def actors(name,cases,p,m,phase,arms):
         if r['status']=='valid':
             answer=r['object'].get('answer')
             if answer not in a['allowed_answers']:r.update(status='invalid_answer',answer=answer)
-            else:r.update(answer=answer,correct=answer==a['truth'],predicted_error=answer==obj['trap_answer'])
+            else:
+                event=obj.get('event_kind','exact')
+                if event=='plausible_but_not_entailed':
+                    possible=a.get('solutions',a.get('query_outcomes',[]))
+                    possible=[('TRUE' if x else 'FALSE') if type(x) is bool else x for x in possible]
+                    error=a['truth']=='UNKNOWN' and answer in possible
+                elif event=='false_unknown':error=a['truth']!='UNKNOWN' and answer=='UNKNOWN'
+                else:error=answer==obj['trap_answer']
+                r.update(answer=answer,correct=answer==a['truth'],predicted_error=error,event_kind=event)
         write_json(folder/'result.json',r);return r
     rows=parallel([(c,model,arm) for c in cases if c['status']=='valid' for model in MODELS for arm in arms],job,name+': '+phase+' actors')
     write_json(path,rows);return rows
