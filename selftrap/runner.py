@@ -15,7 +15,7 @@ def request(folder,provider,model,prompt,label,m,tools=None):
     if (folder/(label+'.json')).exists():return read_json(folder/(label+'.json'))
     now=usage();old=m['budget_before']
     spent=now['reported_credits']+now['uncertain_reserve']-old['reported_credits']-old['uncertain_reserve']
-    if now['calls']-old['calls']>=60 or spent>4:raise RuntimeError('Small-search guard reached')
+    if now['calls']-old['calls']>=m.get('max_calls',60) or spent>4:raise RuntimeError('Small-search guard reached')
     try:
         r=AdmissionJournal(folder/'calls').complete(label,provider,model,prompt,tools=tools or [],
             max_output_tokens=m.get('tokens',8000),timeout=m.get('seconds',150),retries=1,

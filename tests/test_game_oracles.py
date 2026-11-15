@@ -3,6 +3,7 @@ from itertools import product
 from selftrap.games.mastermind import feedback,inspect
 from selftrap.programs import run_generator
 from selftrap.games import blackbox,minesweeper,zendo
+from selftrap.ordered_pilot import event_matches
 
 def test_mastermind_duplicate_symbols_and_independent_feedback():
     assert feedback('AABB','AAAA')==[2,0]
@@ -48,3 +49,13 @@ def test_zendo_retains_counterexample_rule():
     assert r['truth']=='UNKNOWN' and r['query_outcomes']==[False,True]
     assert zendo.rule_mask([[1]]) in zendo.hypothesis_masks()
     assert zendo.rule_mask([[1,-6]]) in zendo.hypothesis_masks()
+
+def test_epistemic_error_excludes_plain_inconsistent_answers():
+    a=inspect({'alphabet':'ABC','secret':'ABAC','guesses':['AAAA','BBBB','ABCA','AABB']})
+    assert a['solutions']==['ABAC','BACA']
+    case={'analysis':a,'event_kind':'plausible_but_not_entailed'}
+    assert event_matches(case,'BACA')
+    assert not event_matches(case,'AABA') and not event_matches(case,'UNKNOWN')
+    z=zendo.inspect({'rule':[[1]],'examples':['000000','100000'],'query':'100001'})
+    assert event_matches({'analysis':z,'event_kind':'plausible_but_not_entailed'},'FALSE')
+    assert not event_matches({'analysis':z,'event_kind':'plausible_but_not_entailed'},'UNKNOWN')

@@ -247,7 +247,16 @@ execution tools. Return one row per case-target through submit_forecasts.
         return r
     rows=parallel(MODELS,job,name+': forecasts');write_json(path,rows);return rows
 
-def actors(name,cases,p,m,phase,arms):
+def event_matches(obj,answer):
+    a=obj['analysis'];event=obj.get('event_kind','exact')
+    if event=='plausible_but_not_entailed':
+        possible=a.get('solutions',a.get('query_outcomes',[]))
+        possible=[('TRUE' if x else 'FALSE') if type(x) is bool else x for x in possible]
+        return a['truth']=='UNKNOWN' and answer in possible
+    if event=='false_unknown':return a['truth']!='UNKNOWN' and answer=='UNKNOWN'
+    return answer==obj['trap_answer']
+
+def actors(name,cases,p,m,phase,arms,models=MODELS):
     out=BASE/name;game=load_game(name);path=out/(phase+'-actors.json')
     if path.exists():return read_json(path)
     def job(j):
@@ -259,16 +268,9 @@ def actors(name,cases,p,m,phase,arms):
             answer=r['object'].get('answer')
             if answer not in a['allowed_answers']:r.update(status='invalid_answer',answer=answer)
             else:
-                event=obj.get('event_kind','exact')
-                if event=='plausible_but_not_entailed':
-                    possible=a.get('solutions',a.get('query_outcomes',[]))
-                    possible=[('TRUE' if x else 'FALSE') if type(x) is bool else x for x in possible]
-                    error=a['truth']=='UNKNOWN' and answer in possible
-                elif event=='false_unknown':error=a['truth']!='UNKNOWN' and answer=='UNKNOWN'
-                else:error=answer==obj['trap_answer']
-                r.update(answer=answer,correct=answer==a['truth'],predicted_error=error,event_kind=event)
+                r.update(answer=answer,correct=answer==a['truth'],predicted_error=event_matches(obj,answer),event_kind=obj.get('event_kind','exact'))
         write_json(folder/'result.json',r);return r
-    rows=parallel([(c,model,arm) for c in cases if c['status']=='valid' for model in MODELS for arm in arms],job,name+': '+phase+' actors')
+    rows=parallel([(c,model,arm) for c in cases if c['status']=='valid' for model in models for arm in arms],job,name+': '+phase+' actors')
     write_json(path,rows);return rows
 
 def gate(cases,rows):
