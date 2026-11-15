@@ -18,6 +18,10 @@ Closed directions (15 November 2026)
    witnesses, two Qwen truncations). Dropped after four calls. Source bc0237c;
    raw evidence in ignored runs/new-search/rule-blindspots-1.
 
+5. Global guarantees in invented compiler-certified games: 4/4 valid, but
+   only one contained softlocks; gate required two. Dropped before audits.
+   Interpreter remains reusable; results in runs/new-search/compiler-games-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
