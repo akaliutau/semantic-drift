@@ -3,7 +3,7 @@ import argparse
 from copy import deepcopy
 from pathlib import Path
 from . import switches
-from .pilot import actor_text,move_tool
+from .tasks import actor_text,move_tool
 from .runner import request,parallel
 from .runtime import ROOT,BudgetProvider,MODELS,usage
 from .storage import digest,dumps,read_json,utc_now,write_json
@@ -24,7 +24,7 @@ def prepare():
         'forecast_contract':'Exact native request parameters and gold supplied; predict action distribution and noncompletion under EACH setting for EACH target. Freeze every forecast before any actor.',
         'gate':'At least two paired action/outcome differences, with at least one self forecast assigning the observed event <.25. If gate fails, do not enlarge. Differences are not called causal until fresh paired repetitions.',
         'novelty':'Whether model-specific behavioral self-models predict native-harness interventions, beyond generic accuracy gains or prompt edits. Prior exploratory gate failed and is excluded.',
-        'source':{f:(ROOT/'selftrap'/f).read_text() for f in ['contracts.py','pilot.py','switches.py','runner.py']}}
+        'source':{f:(ROOT/'selftrap'/f).read_text() for f in ['contracts.py','tasks.py','switches.py','runner.py']}}
     write_json(OUT/'manifest.json',m);write_json(OUT/'cases.json',cases)
     write_json(OUT/'case_seal.json',{'at':utc_now(),'cases_hash':digest(cases),'manifest_hash':digest(m)})
     return m
