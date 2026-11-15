@@ -13,9 +13,10 @@ ALLOWED=(ast.Module,ast.FunctionDef,ast.arguments,ast.arg,ast.Return,ast.Assign,
     ast.keyword,ast.Attribute,ast.Lambda,ast.And,ast.Or,ast.Not,ast.Add,ast.Sub,ast.Mult,
     ast.Div,ast.FloorDiv,ast.Mod,ast.USub,ast.UAdd,ast.Eq,ast.NotEq,ast.Lt,ast.LtE,
     ast.Gt,ast.GtE,ast.In,ast.NotIn,ast.Is,ast.IsNot,ast.Break,ast.Continue,ast.Pass,ast.Import,ast.alias,ast.Try,ast.ExceptHandler,ast.Raise)
-ATTRIBUTES={'Random','randrange','randint','choice','choices','sample','shuffle','random',
-    'append','extend','copy','reverse','count','index','get','items','keys','values','join'}
-BUILTINS=('range','len','min','max','sum','abs','int','str','bool','list','tuple','dict','set',
+ATTRIBUTES={'Random','seed','randrange','randint','choice','choices','sample','shuffle','random',
+    'append','extend','copy','reverse','count','index','get','items','keys','values','join',
+    'sort','pop','remove','insert','add','discard','update','union','intersection','difference'}
+BUILTINS=('range','len','min','max','sum','abs','int','str','bool','float','chr','ord','list','tuple','dict','set',
     'enumerate','zip','sorted','all','any','reversed','Exception','ValueError','RuntimeError')
 
 def validate_source(code):

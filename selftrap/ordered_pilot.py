@@ -95,7 +95,8 @@ Actors get only game rules and the public puzzle, a native submit_answer tool,
 6500 output tokens/120s, no code execution. All author data, hidden world,
 forecasts and oracle answers are hidden from actors. Advice appears only in
 the stated intervention arms. Do not put instructions into puzzle fields.
-Submit code through submit_generator. One construction-only repair allowed.
+Submit concise working code through submit_generator. No source comments or
+embedded exploratory reasoning. One construction-only repair allowed.
 '''+dumps({'your_model':model.id,'models':[x.id for x in MODELS],'game':name,'rules':game.RULES,'generator_contract':game.AUTHOR,'generic_advice':CONTROL})
         error=None;r={}
         for attempt in range(2):
@@ -112,6 +113,27 @@ Submit code through submit_generator. One construction-only repair allowed.
         write_json(folder/'result.json',r);return r
     authors=parallel(MODELS,job,name+': generators');write_json(out/'authors.json',authors)
     write_json(out/'code_seal.json',{'at':utc_now(),'authors_hash':digest(authors),'before_seeds':True})
+    return authors
+
+def adopt_validated(name):
+    """Recover unchanged submissions after a documented runtime compatibility fix."""
+    out=BASE/name;path=out/'adopted-authors.json'
+    if path.exists():return read_json(path)
+    game=load_game(name);authors=[];audit=[]
+    for model in MODELS:
+        for attempt in range(2):
+            source=out/'authors'/model.id/f'code-{attempt}.json'
+            if not source.exists():continue
+            r=read_json(source)
+            if r.get('status')!='valid':continue
+            try:
+                code=r['object']['code'];case=check_case(run_generator(code,0,name)['value'],game)
+                authors.append({**r,'model':model.id,'code':code,'development_case':case,'adopted_unchanged_from':str(source)})
+                audit.append({'model':model.id,'attempt':attempt,'valid':True});break
+            except (ValueError,TypeError,KeyError,SyntaxError) as exc:audit.append({'model':model.id,'attempt':attempt,'valid':False,'reason':str(exc)})
+    write_json(path,authors);write_json(out/'adoption-seal.json',{'at':utc_now(),'audit':audit,'authors_hash':digest(authors),'before_new_cases':True,
+        'reason':'Corrected pure-Python runtime compatibility (random.seed, ordinary collection methods, chr/ord). First valid unchanged submission per model, development seed only. No actor feedback used.',
+        'programs_source':(ROOT/'selftrap/programs.py').read_text()})
     return authors
 
 def make_cases(name,authors,phase):
@@ -213,24 +235,27 @@ def concurrency_report(m):
        'http_429':sum(c.get('status_code')==429 for c in calls),'new_requests':len(calls),'usage_after':usage()}
     write_json(BASE/'concurrency.json',r);return r
 
-def run(name):
+def run(name,adopt=False):
     m=prepare();game=load_game(name);p=BudgetProvider(concurrency=3,per_model_concurrency=2);started=perf_counter()
     try:
-        authors=invent(name,p,m);cases=make_cases(name,authors,'discovery')
+        phase='compatibility' if adopt else 'discovery'
+        write_json(BASE/name/(phase+'-runner.json'),{'at':utc_now(),'source':Path(__file__).read_text(),'programs':(ROOT/'selftrap/programs.py').read_text()})
+        authors=adopt_validated(name) if adopt else invent(name,p,m);cases=make_cases(name,authors,phase)
         valid=[c for c in cases if c['status']=='valid']
-        fs=forecasts(name,cases,p,m,'discovery') if valid else []
-        rows=actors(name,cases,p,m,'discovery',['baseline']) if valid else []
+        fs=forecasts(name,cases,p,m,phase) if valid else []
+        rows=actors(name,cases,p,m,phase,['baseline']) if valid else []
         result={'at':utc_now(),'game':name,'authors':[(a['model'],a['status'],a.get('reason')) for a in authors],
             'valid_cases':len(valid),'scored':sum(r['status']=='valid' for r in rows),'correct':sum(bool(r.get('correct')) for r in rows),
             'exact_predicted_errors':sum(bool(r.get('predicted_error')) for r in rows),'qualifying_generators':gate(cases,rows),
             'scores':prediction_scores(fs,rows),'seconds':perf_counter()-started,'rows':rows}
-        write_json(BASE/name/'discovery-result.json',result);print(dumps(result),flush=True)
+        result.update(phase=phase,authors_file='adopted-authors.json' if adopt else 'authors.json')
+        write_json(BASE/name/(phase+'-result.json'),result);write_json(BASE/name/'latest-result.json',result);print(dumps(result),flush=True)
     finally:p.close();print(dumps({'concurrency':concurrency_report(m)}),flush=True)
 
 def confirm(name):
-    m=prepare();out=BASE/name;prior=read_json(out/'discovery-result.json');qualified=prior['qualifying_generators']
+    m=prepare();out=BASE/name;prior=read_json(out/'latest-result.json');qualified=prior['qualifying_generators']
     if not qualified:raise ValueError('Discovery gate failed; no confirmation permitted')
-    authors=[a for a in read_json(out/'authors.json') if a['model']==qualified[0]]
+    authors=[a for a in read_json(out/prior['authors_file']) if a['model']==qualified[0]]
     cases=make_cases(name,authors,'confirmation');p=BudgetProvider(concurrency=3,per_model_concurrency=2)
     try:
         rows=actors(name,cases,p,m,'confirmation',['baseline','repair','control'])
@@ -243,5 +268,6 @@ def confirm(name):
     finally:p.close();print(dumps({'concurrency':concurrency_report(m)}),flush=True)
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('game',choices=ORDER);parser.add_argument('--confirm',action='store_true');args=parser.parse_args()
-    (confirm if args.confirm else run)(args.game)
+    parser=argparse.ArgumentParser();parser.add_argument('game',choices=ORDER);parser.add_argument('--confirm',action='store_true');parser.add_argument('--adopt-validated',action='store_true');args=parser.parse_args()
+    if args.confirm:confirm(args.game)
+    else:run(args.game,adopt=args.adopt_validated)
