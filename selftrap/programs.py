@@ -35,14 +35,19 @@ import json,random,resource,sys
 resource.setrlimit(resource.RLIMIT_AS,(256*1024*1024,256*1024*1024))
 resource.setrlimit(resource.RLIMIT_CPU,(3,3))
 sys.path.insert(0,sys.argv[1])
-from selftrap.nonogram import inspect_bitmap
 from selftrap.programs import BUILTINS,validate_source
 request=json.load(sys.stdin);calls=0
-def inspect(bitmap):
+if request.get('game'):
+ from selftrap.games import load_game
+ inspector=load_game(request['game']).inspect
+else:
+ from selftrap.nonogram import inspect_bitmap
+ inspector=inspect_bitmap
+def inspect(value):
  global calls
  calls+=1
  if calls>8:raise ValueError('At most eight inspect calls per seed')
- return inspect_bitmap(bitmap)
+ return inspector(value)
 def safe_import(name,*args,**kwargs):
  if name!='random':raise ValueError('Only random may be imported')
  return random
@@ -56,11 +61,11 @@ try:
 except Exception as exc:print(json.dumps({'ok':False,'error':type(exc).__name__+': '+str(exc)}))
 '''
 
-def run_generator(code,seed):
+def run_generator(code,seed,game=None):
     validate_source(code);root=Path(__file__).resolve().parent.parent
     try:
         process=subprocess.run([sys.executable,'-I','-c',WORKER,str(root)],
-            input=json.dumps({'code':code,'seed':seed}),text=True,capture_output=True,
+            input=json.dumps({'code':code,'seed':seed,'game':game}),text=True,capture_output=True,
             timeout=5,cwd='/tmp',env={'PATH':os.defpath,'PYTHONHASHSEED':'0'})
     except subprocess.TimeoutExpired:raise ValueError('Generator exceeded five-second wall cap') from None
     if process.returncode!=0 or len(process.stdout)>50000:raise ValueError('Generator failed CPU/memory/output cap')

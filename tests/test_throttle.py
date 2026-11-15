@@ -1,6 +1,8 @@
 """No live calls: verify shared admission and spending, not model behavior."""
 
 from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor
+import threading
 from datetime import datetime,timezone
 from email.utils import format_datetime
 from pathlib import Path
@@ -10,6 +12,7 @@ import pytest
 
 from selftrap.runtime import BudgetProvider
 from selftrap.providers import ModelSpec,ProviderError
+from selftrap.providers import ModelResponse
 from selftrap.storage import read_json,write_json
 from selftrap.throttle import CollectionStopped,SharedBudget,SharedThrottle,retry_after_seconds
 
@@ -106,3 +109,16 @@ def test_blocked_request_never_reaches_client_or_reserves_money(tmp_path):
     provider=BudgetProvider(client=Client(),ledger_path=path,throttle=limiter)
     with pytest.raises(CollectionStopped):provider.complete(ModelSpec('m'),'x',tools=[],max_output_tokens=1,timeout=5)
     assert not read_json(path)['calls']
+
+def test_explicit_same_model_parallelism_reaches_client(tmp_path):
+    path=tmp_path/'budget.json';write_json(path,{'hard_ceiling':190,'operational_ceiling':160,'calls':[]})
+    barrier=threading.Barrier(2)
+    class Client:
+        def complete(self,*args,**kwargs):
+            barrier.wait(timeout=2)
+            return ModelResponse('',[],{'status':'completed'},.01,{'input_tokens':1,'output_tokens':1,'cost':.001},.001,'credits')
+    limiter=SharedThrottle(tmp_path/'admission',interval=0,rpm=100,tpm=100000)
+    provider=BudgetProvider(client=Client(),ledger_path=path,throttle=limiter,per_model_concurrency=2)
+    def call(_):return provider.complete(ModelSpec('m'),'x',tools=[],max_output_tokens=5,timeout=5)
+    with ThreadPoolExecutor(max_workers=2) as pool:assert len(list(pool.map(call,range(2))))==2
+    assert len(read_json(path)['calls'])==2

@@ -28,17 +28,18 @@ def usage(path=LEDGER):
 
 
 class BudgetProvider:
-    def __init__(self,concurrency=3,*,client=None,ledger_path=LEDGER,throttle=None):
+    def __init__(self,concurrency=3,*,per_model_concurrency=1,client=None,ledger_path=LEDGER,throttle=None):
+        if concurrency < 1 or per_model_concurrency < 1:raise ValueError('Concurrency must be positive')
         self.budget=SharedBudget(ledger_path);self.path=self.budget.path
         directory=self.path.parent/'shared-admission'
         config=read_json(directory/'state.json')['config'] if (directory/'state.json').exists() else {}
         self.throttle=throttle or SharedThrottle(directory,**config)
         self.client=client or StreamingProvider(AdaptionProvider(ROOT/'.env'))
         self.slots=threading.Semaphore(concurrency)
-        self.model_locks={};self.lock=threading.Lock()
+        self.model_locks={};self.lock=threading.Lock();self.per_model_concurrency=per_model_concurrency
 
     def complete(self,model,messages,*,tools,max_output_tokens,**kwargs):
-        with self.lock:lock=self.model_locks.setdefault(model.id,threading.Lock())
+        with self.lock:lock=self.model_locks.setdefault(model.id,threading.Semaphore(self.per_model_concurrency))
         with lock,self.slots:
             lease=self.throttle.acquire(model.id,len(dumps([messages,tools]).encode())+max_output_tokens)
             index=None;started=perf_counter()
