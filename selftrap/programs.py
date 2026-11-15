@@ -12,11 +12,11 @@ ALLOWED=(ast.Module,ast.FunctionDef,ast.arguments,ast.arg,ast.Return,ast.Assign,
     ast.GeneratorExp,ast.comprehension,ast.Call,ast.Name,ast.Load,ast.Store,ast.Constant,
     ast.keyword,ast.Attribute,ast.Lambda,ast.And,ast.Or,ast.Not,ast.Add,ast.Sub,ast.Mult,
     ast.Div,ast.FloorDiv,ast.Mod,ast.USub,ast.UAdd,ast.Eq,ast.NotEq,ast.Lt,ast.LtE,
-    ast.Gt,ast.GtE,ast.In,ast.NotIn,ast.Is,ast.IsNot,ast.Break,ast.Continue,ast.Pass)
+    ast.Gt,ast.GtE,ast.In,ast.NotIn,ast.Is,ast.IsNot,ast.Break,ast.Continue,ast.Pass,ast.Import,ast.alias,ast.Try,ast.ExceptHandler,ast.Raise)
 ATTRIBUTES={'Random','randrange','randint','choice','choices','sample','shuffle','random',
     'append','extend','copy','reverse','count','index','get','items','keys','values','join'}
 BUILTINS=('range','len','min','max','sum','abs','int','str','bool','list','tuple','dict','set',
-    'enumerate','zip','sorted','all','any','reversed')
+    'enumerate','zip','sorted','all','any','reversed','Exception','ValueError','RuntimeError')
 
 def validate_source(code):
     if not isinstance(code,str) or len(code)>18000:raise ValueError('Generator code too long')
@@ -24,9 +24,10 @@ def validate_source(code):
     if not any(isinstance(n,ast.FunctionDef) and n.name=='generate' for n in tree.body):raise ValueError('Define generate(seed)')
     for n in ast.walk(tree):
         if not isinstance(n,ALLOWED):raise ValueError('Unsupported generator syntax: '+type(n).__name__)
-        if isinstance(n,ast.Name) and n.id.startswith('_'):raise ValueError('Private names excluded')
+        if isinstance(n,ast.Import) and any(a.name!='random' for a in n.names):raise ValueError('Only import random is allowed')
+        if isinstance(n,ast.Name) and n.id.startswith('__'):raise ValueError('Private names excluded')
         if isinstance(n,ast.Attribute) and n.attr not in ATTRIBUTES:raise ValueError('Unsupported attribute: '+n.attr)
-        if isinstance(n,ast.FunctionDef) and (n.decorator_list or n.name.startswith('_')):raise ValueError('No decorators/private functions')
+        if isinstance(n,ast.FunctionDef) and (n.decorator_list or n.name.startswith('__')):raise ValueError('No decorators/private functions')
     return code
 
 WORKER=r'''
@@ -42,7 +43,12 @@ def inspect(bitmap):
  calls+=1
  if calls>8:raise ValueError('At most eight inspect calls per seed')
  return inspect_bitmap(bitmap)
-g={'__builtins__':{k:__builtins__[k] if isinstance(__builtins__,dict) else getattr(__builtins__,k) for k in BUILTINS},'random':random,'inspect':inspect}
+def safe_import(name,*args,**kwargs):
+ if name!='random':raise ValueError('Only random may be imported')
+ return random
+builtins={k:__builtins__[k] if isinstance(__builtins__,dict) else getattr(__builtins__,k) for k in BUILTINS}
+builtins['__import__']=safe_import
+g={'__builtins__':builtins,'random':random,'inspect':inspect}
 try:
  exec(compile(validate_source(request['code']),'<generator>','exec'),g)
  value=g['generate'](request['seed'])

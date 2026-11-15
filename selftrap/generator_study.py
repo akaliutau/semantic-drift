@@ -1,17 +1,22 @@
 """Model-written Nonogram generators as prospective personal failure hypotheses."""
 import argparse
 from pathlib import Path
-from .nonogram import RULES,validate_case,actor_view
+from .nonogram import RULES,validate_case,validate_symmetric_case,actor_view
 from .programs import run_generator
 from .runner import request,parallel
 from .runtime import ROOT,BudgetProvider,MODELS,usage
 from .storage import digest,dumps,read_json,utc_now,write_json
 
 OUT=ROOT/'runs/new-search/nonogram-generators-1'
+SYMMETRIC=False
+
+def check_case(obj):
+    return validate_symmetric_case(obj) if SYMMETRIC else validate_case(obj)
 
 def prepare():
     if (OUT/'manifest.json').exists():return read_json(OUT/'manifest.json')
     m={'at':utc_now(),'candidate':'real_logic_game_failure_generators','budget_before':usage(),'tokens':10000,'seconds':160,
+        'symmetric':SYMMETRIC,
         'construction':'One Python generate(seed) program/model, one validity-only repair. Development seed 0; freeze before hidden seeds 101,307. At most eight inspect calls/seed.',
         'baseline_seeds':[101,307],'confirmation_seeds':[503,709],
         'gate':'One SELF-targeted generator causes its predicted wrong cell value at BOTH fresh seeds, and the peer is correct at least once. No invalid-seed replacement.',
@@ -38,7 +43,7 @@ making hard puzzles. Invent the bitmap construction, query selection, and the
 mechanism. You must implement generate(seed), not manually describe puzzles.
 
 Runtime: Python, pure computation. random is pre-supplied, so use
-rng=random.Random(seed); DO NOT import anything. Basic loops, comprehensions,
+rng=random.Random(seed); You may import random, but no other modules. Basic loops, comprehensions,
 lists/dicts, string join/count/index and standard numeric/list builtins work.
 No files, network, eval, while loops, classes, or private attributes. Hard caps:
 3 CPU seconds, 256MB memory, 8 inspect(bitmap) calls per seed.
@@ -73,9 +78,24 @@ choose only the queried bit through a native submit_cell tool (no full-grid
 output). Unique solution is stated. 10k tokens/160s, no external code execution.
 Neither bitmap, generator, diagnosis, forecasts nor author identity is shown.
 Future seeds are held out. Use seed to create a FAMILY, not a constant bitmap.
-Call submit_generator with concise working source. No imports or prose outside
+Call submit_generator with concise working source. No prose outside
 that function call. One validity-only repair is allowed; never actor feedback.
 '''+dumps({'your_model':model.id,'models':[x.id for x in MODELS],'game_rules':RULES})
+            if SYMMETRIC:
+                text += """
+STRONG CAUSAL CONTROL: make every bitmap row a horizontal palindrome.
+Query must be in the CENTER COLUMN. diagnostic_hint=[r,c] and control_hint=
+[r,size-1-c] must be distinct mirror counterparts. They then have the SAME
+true value, and reflection leaves both the clue puzzle and query unchanged.
+Thus both hints provide mathematically EQUIVALENT information. Your hypothesis
+must predict a PERSONAL evidence-use asymmetry, not different logical strength:
+one position should repair YOUR error and the equivalent mirror should not.
+You choose the intended orientation; it need not be left or right.
+Return one extra field hint_forecasts, mapping each EXACT model ID to
+{"diagnostic_correct":probability,"control_correct":probability}. All values
+in [0,1]. Make a genuine seeded family. random imports and underscore loop
+variables are now supported. Avoid huge source comments; implement and check.
+"""
             error=None;r={}
             for attempt in range(2):
                 prompt=text if error is None else text+'\nCompiler feedback on development seed 0: '+error+'\nReturn the complete corrected generator, keeping the intended target mechanism.'
@@ -83,7 +103,7 @@ that function call. One validity-only repair is allowed; never actor feedback.
                 if r['status']!='valid':break
                 try:
                     code=r['object']['code'];generated=run_generator(code,0)
-                    case=validate_case(generated['value']);r.update(code=code,development_case=case,inspect_calls=generated['inspect_calls']);error=None
+                    case=check_case(generated['value']);r.update(code=code,development_case=case,inspect_calls=generated['inspect_calls']);error=None
                 except (ValueError,TypeError,KeyError,SyntaxError) as exc:
                     error=str(exc);r.update(status='invalid_program',reason=error)
                 write_json(folder/f'validation-{attempt}.json',{'at':utc_now(),'error':error})
@@ -96,7 +116,7 @@ that function call. One validity-only repair is allowed; never actor feedback.
             if a['status']!='valid':continue
             for seed in m['baseline_seeds']:
                 record={'author':a['model'],'seed':seed,'code_hash':digest(a['code'])}
-                try:record.update(status='valid',case=validate_case(run_generator(a['code'],seed)['value']))
+                try:record.update(status='valid',case=check_case(run_generator(a['code'],seed)['value']))
                 except (ValueError,KeyError,TypeError) as exc:record.update(status='invalid',reason=str(exc))
                 cases.append(record)
         write_json(OUT/'cases.json',cases);write_json(OUT/'case_seal.json',{'at':utc_now(),'cases_hash':digest(cases),'authors_hash':digest(authors)})
@@ -136,4 +156,6 @@ def baseline():
     finally:p.close()
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('stage',choices=['invent','baseline']);globals()[p.parse_args().stage]()
+    p=argparse.ArgumentParser();p.add_argument('stage',choices=['invent','baseline']);p.add_argument('--symmetric',action='store_true');a=p.parse_args()
+    if a.symmetric:SYMMETRIC=True;OUT=ROOT/'runs/new-search/symmetric-nonogram-1'
+    globals()[a.stage]()

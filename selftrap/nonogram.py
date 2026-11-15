@@ -56,7 +56,7 @@ def inspect_bitmap(bitmap):
 
 def validate_case(obj):
     required={'bitmap','query','predicted_wrong','diagnostic_hint','control_hint','p_wrong','diagnosis'}
-    if not isinstance(obj,dict) or set(obj)!=required:raise ValueError('Wrong generated case fields')
+    if not isinstance(obj,dict) or not required<=set(obj) or set(obj)-required-{'hint_forecasts'}:raise ValueError('Wrong generated case fields')
     bitmap=obj['bitmap'];n=validate_bitmap(bitmap);p=puzzle(bitmap);s=solve(p)
     if s['status']!='COMPLETE' or len(s['solutions'])!=1:raise ValueError('Need proven unique puzzle (UNKNOWN never counts)')
     def pos(v):return isinstance(v,list) and len(v)==2 and all(type(i) is int and 0<=i<n for i in v)
@@ -89,3 +89,19 @@ are all patterns allowed by EACH individual line, not complete-grid solutions.
 Combine row and column constraints. Exactly one of 0/1 is correct at query.
 Any revealed cells are verified true and must be respected. Return one cell
 value through submit_cell, not a full bitmap. You may reason before choosing.'''
+
+
+def validate_symmetric_case(obj):
+    case=validate_case(obj);bitmap=case['bitmap'];n=len(bitmap);p=case['puzzle']
+    if any(row!=row[::-1] for row in bitmap):raise ValueError('Every bitmap row must be mirror symmetric')
+    if case['query'][1]!=n//2:raise ValueError('Query must lie on the fixed center column')
+    dr,dc=case['diagnostic_hint'];cr,cc=case['control_hint']
+    if dr!=cr or cc!=n-1-dc or dc==cc:raise ValueError('Hints must be distinct horizontal mirror counterparts')
+    if p['column_clues']!=p['column_clues'][::-1] or any(c!=c[::-1] for c in p['row_clues']):raise RuntimeError('Clues not invariant under reflection')
+    if bitmap[dr][dc]!=bitmap[cr][cc]:raise RuntimeError('Symmetric hint values differ')
+    forecasts=case.get('hint_forecasts')
+    for model in ['qwen3.5-397b','gemma-4-31b-it']:
+        row=forecasts[model]
+        if set(row)!={'diagnostic_correct','control_correct'} or any(type(v) not in {int,float} or not 0<=v<=1 for v in row.values()):raise ValueError('Explicit per-model hint probabilities required')
+    case['symmetry_certificate']={'transformation':'column c -> n-1-c','puzzle_fixed':True,'query_fixed':True,'hints_swapped':True,'hint_bit_equal':True}
+    return case
