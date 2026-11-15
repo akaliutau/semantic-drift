@@ -1,54 +1,58 @@
-# Target and current search
+# Target: a novel 15/15 study
 
-Target: a novel, clear AI epistemics study with a credible path to the rubric's
-15/15. A fresh toy game alone does not qualify. A candidate must identify a new
-failure mechanism, verify it mechanically, beat obvious alternative explanations,
-and survive a small fresh replication. No score is guaranteed before evidence.
+A new toy game alone does not qualify. The result must establish a new,
+mechanically checkable distinction in self-specific prediction and diagnosis,
+with matched peer controls and a small fresh replication. A score is an aim,
+not something to declare before the evidence exists.
 
-Current candidate: **Does a model know what its harness makes it do?**
-A model invents game mechanics. A compiler constructs solvable worlds with
-certified misleading shortcuts. Before acting, each model predicts its own and
-a peer's action distributions under two *exactly disclosed* native API contracts.
-Only tool_choice changes; inputs, tool schema and budgets match. Test whether
-self-models predict this intervention and whether a self-diagnosis predicts a
-repair that actually works. Parser failures and token exhaustion remain separate.
+Current candidate: **Can a model discover executable laws of its own mistakes?**
 
-Initial probe: both targets committed a certified greedy error. Gemma predicted
-its own actual move with .60 probability, peer .45; Qwen self .25, peer .50.
-That failed its predeclared self-advantage gate. Native tool_choice was not fully
-specified in those forecast instructions, so it cannot confirm the new claim.
-The new experiment uses three fresh states and fresh forecasts, twelve actors.
-No original outcome is relabelled. Raw protocols and all rejected rounds are
-kept in ignored runs/new-search/; active source retains reusable components.
+Instead of asking it to invent a hard puzzle, give it a few measured failures.
+It writes a program that generates NEW instances and predicts the EXACT wrong
+answer its own fresh copies will produce. The generator is frozen before the
+new instances run. Test the same law on a peer: a generic difficulty generator
+is insufficient. A diagnosis earns credit only by predicting new errors.
 
-Further approaches, only if this candidate fails:
+The current cheap gate uses string programs: prefix + atom*n + suffix. Each
+proposed law predicts an incorrect count as a*n+b for unseen n. Ground truth
+is computed mechanically. Both models see the same discovery observations;
+both author laws targeting themselves and their peer. Two fresh n per law,
+both actors. Advance only if a SELF-authored law predicts both exact own errors
+and the peer is correct on at least one. No replacing failed laws or counting
+old observations as held-out evidence.
 
-- **Executable self-diagnosis.** Replace prose explanations with a small
-  executable predicate predicting exactly where *this model* will fail. Test
-  its precision on fresh invented worlds, against peer predicates and a
-  model-agnostic difficulty predictor. A diagnosis that fits its training trace
-  but fails under a semantics-preserving change is rejected.
-- **Forecast the cure.** Before a known mistake recurs, ask whether the model's
-  proposed diagnostic intervention will help itself or only its peer. Score
-  predicted treatment effects and actual corrections on held-out worlds.
-  An accurate mistake forecast without a useful causal repair is insufficient.
+If promising, the decisive next steps are a new n, a fresh atom family, and a
+causal repair predicted by the author before testing. Then transfer the method
+to finite games: an executable generator of states where a named policy is
+wrong, with an exact predicted action. We evaluate diagnosis, not creativity.
 
-Closest primary work and novelty exclusions:
+Other approaches worth a genuinely separate gate:
 
-- [The Token Games](https://arxiv.org/abs/2602.17831): invented verifiable puzzle
-  duels. We need model-specific foresight and diagnosis, not invention rankings.
-- [Looking Inward](https://proceedings.iclr.cc/paper_files/paper/2025/file/0a6059857ae5c82ea9726ee9282a7145-Paper-Conference.pdf): trained self-prediction;
-  generic self-prediction is already established.
-- [Evaluating and Improving LLM Self-Modeling](https://arxiv.org/abs/2608.30980)
-  and [CHIVE](https://arxiv.org/abs/2608.16747): counterfactual self-modeling and
-  explanation simulatability. Prompt-edit forecasts alone would overlap.
-- [Self-Authored Verification](https://arxiv.org/abs/2607.24300): self-tests can
-  miss deployment regressions. Inventing a poor verifier alone would overlap.
-- [Reality Check](https://arxiv.org/abs/2605.26242): public input cues can imitate
-  introspection. No privileged-access claim without matched information controls.
-- [Masked by Consensus](https://arxiv.org/abs/2604.12373): task/domain and model
-  agreement affect apparent self-knowledge. Raw confidence bias is insufficient.
+- **Constructive self-refutation:** target a model's self-predictor rather than
+  its solver. Find tasks with matched solver performance but sharply different
+  self-versus-peer prediction loss. Control historical bias and task difficulty.
+- **Forecast the cure:** ask which diagnostic intervention will fix this model
+  versus its peer, before running either. Require predicted treatment effects
+  and fresh behavioral repair, not retrospective plausible explanations.
 
-Searches found no direct match for *prospective self-versus-peer prediction of
-native tool-choice intervention effects*. This is a provisional novelty claim,
-not an exhaustive absence claim. A strong empirical finding is still required.
+Nearby work that rules out generic novelty claims:
+
+- [The Token Games](https://arxiv.org/abs/2602.17831): verifiable puzzle duels.
+- [Looking Inward](https://proceedings.iclr.cc/paper_files/paper/2025/file/0a6059857ae5c82ea9726ee9282a7145-Paper-Conference.pdf): trained self-prediction.
+- [Self-Modeling](https://arxiv.org/abs/2608.30980) and
+  [CHIVE](https://arxiv.org/abs/2608.16747): counterfactual behavioral questions
+  and explanation simulatability. A prose explanation plus a few edits overlaps.
+- [Self-Authored Verification](https://arxiv.org/abs/2607.24300): unreliable
+  self-tests; producing a poor verifier alone is insufficient.
+- [Reality Check](https://arxiv.org/abs/2605.26242): input cues can mimic
+  introspection. No privileged-access claim from ordinary behavioral prediction.
+- [Masked by Consensus](https://arxiv.org/abs/2604.12373): domain and agreement
+  affect apparent self-knowledge. Raw self-confidence differences are inadequate.
+
+Proposed distinction: a model-discovered, executable *generative law* that
+predicts its own specific errors on fresh instances and distinguishes itself
+from a peer, followed by a prospective causal repair. Searches found no exact
+match for that complete protocol; this is provisional, not proof of priority.
+
+Earlier gates are closed in FAILED_DIRECTIONS.txt. In particular, the native
+harness intervention produced no behavioral differences and was dropped.
