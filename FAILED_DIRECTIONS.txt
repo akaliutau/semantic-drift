@@ -14,6 +14,10 @@ Closed directions (15 November 2026)
    some apparent planning errors. Closed after six final-panel episodes;
    two partial and two unrun assignments remain explicitly unscored.
 
+4. Unassisted rule-game witnesses: 0/4 passed construction (two invalid Gemma
+   witnesses, two Qwen truncations). Dropped after four calls. Source bc0237c;
+   raw evidence in ignored runs/new-search/rule-blindspots-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
