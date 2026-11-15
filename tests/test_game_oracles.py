@@ -24,6 +24,8 @@ def test_mastermind_identifiability_and_generator_execution():
     assert solved['solutions']==['AABB'] and solved['truth']=='AABB'
     code="def generate(seed):\n p={'alphabet':'ABC','secret':'AABB','guesses':['AABB']}\n return {'truth':inspect(p)['truth']}"
     assert run_generator(code,5,'mastermind')['value']=={'truth':'AABB'}
+    code="def generate(seed):\n random.seed(seed)\n return {'word':f'{chr(65)}{seed}'}"
+    assert run_generator(code,5,'mastermind')['value']=={'word':'A5'}
 
 def test_blackbox_physics_and_reciprocity():
     assert blackbox.ray(4,[],'T1')=='B1'

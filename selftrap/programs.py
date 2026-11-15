@@ -12,7 +12,8 @@ ALLOWED=(ast.Module,ast.FunctionDef,ast.arguments,ast.arg,ast.Return,ast.Assign,
     ast.GeneratorExp,ast.comprehension,ast.Call,ast.Name,ast.Load,ast.Store,ast.Constant,
     ast.keyword,ast.Attribute,ast.Lambda,ast.And,ast.Or,ast.Not,ast.Add,ast.Sub,ast.Mult,
     ast.Div,ast.FloorDiv,ast.Mod,ast.USub,ast.UAdd,ast.Eq,ast.NotEq,ast.Lt,ast.LtE,
-    ast.Gt,ast.GtE,ast.In,ast.NotIn,ast.Is,ast.IsNot,ast.Break,ast.Continue,ast.Pass,ast.Import,ast.alias,ast.Try,ast.ExceptHandler,ast.Raise)
+    ast.Gt,ast.GtE,ast.In,ast.NotIn,ast.Is,ast.IsNot,ast.Break,ast.Continue,ast.Pass,ast.Import,ast.alias,ast.Try,ast.ExceptHandler,ast.Raise,
+    ast.JoinedStr,ast.FormattedValue)
 ATTRIBUTES={'Random','seed','randrange','randint','choice','choices','sample','shuffle','random',
     'append','extend','copy','reverse','count','index','get','items','keys','values','join',
     'sort','pop','remove','insert','add','discard','update','union','intersection','difference'}
