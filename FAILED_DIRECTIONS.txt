@@ -65,6 +65,25 @@ Closed directions (15 November 2026)
     A separate symmetric-generator proposal has valid constructions but no
     actor evidence yet; it is pending design review, not a confirmed result.
 
+14. Ordered real-game generators (Mastermind, Black Box, Minesweeper, Zendo):
+    no self-authored exact error passed the two-seed gate. Mastermind had real
+    errors, but none matched the predicted wrong code. Minesweeper's completed
+    actors were correct. Black Box/Zendo construction remained a bottleneck;
+    runner compatibility and missing prior-source repair context were fixed.
+    Construction failures were not scored as epistemic failures.
+
+15. Oracle-generated uncertainty controls: real Black Box/Zendo errors in
+    Gemma, but no robust self-specific prediction or repair. Qwen often spent
+    its entire 12k budget reasoning without an answer. Fresh Mastermind errors
+    were inconsistent codes, not the declared plausible-but-unestablished event.
+    Two older Qwen truncations resolved correctly with larger budgets.
+
+16. Forced versus automatic tool choice on two previously failed Mastermind cases:
+    Gemma wrong on both forced repeats and both auto trials; Qwen auto trials
+    exhausted tokens/deadline. The proposed simple harness escape failed.
+    All ordered-pilot receipts: runs/new-search/ordered-games-1.
+    Full concise account: ORDERED_PILOT_REPORT.md. No winning claim or scale-up.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.

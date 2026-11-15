@@ -3,6 +3,11 @@
 Design review, 15 November 2026. This is a proposal, not a positive result.
 No paid trials were started during this review.
 
+Subsequent status: all four directions have been attempted in the
+[ordered pilot](ORDERED_PILOT_REPORT.md). No self-specific failure law passed.
+The rationale below is retained as the original design, not a claim that the
+experiment succeeded.
+
 Question: can a model discover a reproducible mistake in its own behavior,
 predict the specific error on new instances, and predict a repair that works
 better for that model than generic advice does?
