@@ -55,6 +55,16 @@ Closed directions (15 November 2026)
     Superseded by requested real logic-game generator programs.
     Source b15ff74; runs/new-search/active-selfdiagnosis-1.
 
+13. Model-written Nonogram generator: the first unchanged Gemma program
+    produced valid unique puzzles after fixing the runner's random-import
+    restriction. On two fresh seeds, three scored baseline calls were correct;
+    the fourth was unscored because its explicit final submission was not
+    accepted by the then-current parser. No predicted trap was established;
+    the baseline gate failed. No hint-repair trials were run.
+    Results: runs/new-search/nonogram-programs-compat-1.
+    A separate symmetric-generator proposal has valid constructions but no
+    actor evidence yet; it is pending design review, not a confirmed result.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.

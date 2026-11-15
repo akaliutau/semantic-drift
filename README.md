@@ -28,6 +28,7 @@ All paid work reuses the original 190-credit ledger under ignored `runs/`.
 Run manifests, response IDs, native tokens, latency, costs, failed candidates
 and stopping decisions are recorded. Unknown billing retains its reserve.
 
-See [failed directions](FAILED_DIRECTIONS.txt), the supplied
+See the current [game-selection review](SEARCH.md),
+[failed directions](FAILED_DIRECTIONS.txt), the supplied
 [challenge](challenge_descr.txt), and [environment](env_description.txt).
 Prior implementations remain recoverable through Git history.
