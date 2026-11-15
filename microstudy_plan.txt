@@ -1,0 +1,53 @@
+ISOLATED EXPLORATORY MICRO-STUDY -- 15 NOVEMBER 2026
+
+This worktree and its research scripts must not be merged into the main code.
+API spending ceiling: 190 sponsor credits (10% of the reported 1,900 balance).
+The local guard stops new reservations at 160 credits, retaining 30 credits of
+headroom. Timeouts retain conservative reservations. Every response, error,
+prompt, forecast, validity decision and adaptation is kept.
+
+Original primary hypothesis: an author can prospectively target a particular
+wrong first push in its own fresh solver more specifically than peer authors
+target that solver. D is mean diagonal minus mean off-diagonal specificity,
+with invalid authored slots receiving zero construction credit. Strong evidence
+requires prospective predictive value as well as D, not merely difficult games.
+
+Additional hypotheses that must remain distinct:
+H2: diagnostic advice improves full-solution success relative to generic advice.
+H3: a prospective puzzle selection/forecast predicts subsequent mistakes better
+than generic puzzle difficulty. This can support a useful benchmark without
+establishing self-specific knowledge.
+
+Stage A: Feasibility on one handwritten development fixture per model. Initial
+roster: Qwen3.5-397B, GLM-5.2, Gemma-4-31B. No claims use these easy checks.
+Drop an unavailable model before a research round; preserve the reason.
+
+Stage B: Try the original free-form Sokoban authors: one slot per author/target
+cell and generic-hard objective (12 slots). Max two proposals/8,000 output
+tokens per slot. Require independently checked solvability and a legal initial
+push certified to make the puzzle unsolvable. Start with 6-30 optimal pushes.
+Cross-solve every accepted unique puzzle, twice per solver, 4,000 output tokens,
+two simulations, three responses and 90 seconds. No author gets solver outcomes.
+
+Stage C: Up to three explicitly recorded adaptive research variants if needed.
+Choices can include a mechanically valid puzzle workshop, less trivial traps,
+or a different compact game, and altered explicit token/tool budgets. Changing
+the question (e.g. H1 to H2/H3) must be stated. Exploration is not confirmation.
+Adaptation can use exploratory results but never future confirmatory results.
+
+Stage D: Freeze one promising question/variant, sample fresh puzzle seeds and
+fresh generation slots, and collect a fixed holdout sample without effect-based
+stopping. Never reuse discovery puzzles or select confirmation puzzles based on
+observed failure. Report the full holdout, uncertainty and all earlier rounds.
+Use puzzles as clusters, carry repeated runs together, and retain missing API
+outcomes as missing. No declaring significance by pooling adaptive rounds.
+
+Success criteria: seek a practically interesting, repeatable effect. A nominal
+exploratory p-value is only a selection signal. One frozen confirmatory primary
+contrast, two-sided alpha .05, is permitted; secondary contrasts are labeled
+exploratory or adjusted as a family. If no credible signal appears within the
+budget, report that outcome and the best next experiment honestly.
+
+Final report: short results and recommendation; validity, actual sample sizes,
+exact definitions, effect sizes/intervals, all failed variants, total known cost
+and conservative unknown-cost reserve. Implementation test code stays here.

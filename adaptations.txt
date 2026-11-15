@@ -1,0 +1,219 @@
+Recorded before workshop solver outcomes, 15 November 2026.
+
+R1 ORIGINAL FREE-FORM TASK: 12 slots, zero mechanically valid authored puzzles.
+Reasons include service timeouts, invalid JSON/markdown, invalid board grammar,
+goal counts, and one identity-related refusal. No solver test of H1 is possible.
+This is a feasibility failure, not evidence that H1 is false.
+
+R2 WORKSHOP ADAPTATION:
+- Replace unrestricted ASCII construction with prospective forecasts/selection
+  among independently generated, certified candidate puzzles.
+- Replace full solution generation with choosing one legal initial push that
+  preserves existence of a winning continuation. All legal first pushes are
+  exhaustively classified; no oracle result is visible to actors.
+- Every candidate has a nonstatic deadlocking move: boxes remain geometrically
+  able to reach goals in the empty board, so ordinary corner avoidance is
+  insufficient. Prefer a trap moving onto/closer to a goal, without observing
+  any model outcomes.
+- Give forecasters the winning plan and specified bad move, allowing them to
+  understand the mechanism, but withhold these from fresh actors.
+- Use neutral deployment labels, not assertions about the model's identity or
+  instructions framed as exploiting another model.
+- Allow a single complete JSON markdown fence in responses. This is a declared
+  format normalization; semantic mistakes are never repaired by the grader.
+- 12 discovery slates, four distinct candidates each, three forecasters and
+  three actors per candidate; one actor repetition initially. All 36 forecasts
+  are committed before the 144 actor decisions. Actor limit: 3,000 generated
+  tokens, no tools, 65 seconds, one response.
+- Each forecaster predicts p_trap/p_safe for every deployment/candidate. The
+  targeted selection is mechanically the candidate maximizing forecasted target
+  trap probability minus mean peer trap probability. Generic selection maximizes
+  mean trap probability. No selection uses actual actor outcomes.
+- H1 becomes a slate-level diagonal-minus-off-diagonal contrast in selection
+  specificity. Slate is the cluster because choices share candidate outcomes.
+- Additional descriptive outcomes: forecast calibration/discrimination, chosen
+  traps versus unselected candidates, and safe-move rates. These do not by
+  themselves establish self-specific knowledge or novel puzzle invention.
+
+The benchmark's main code and protocol have not been altered. Every change is
+confined to this exploratory worktree. Any promising signal requires a frozen
+fresh-puzzle holdout. No significant discovery result is itself confirmation.
+
+R3 BINARY/SINGLE-ITEM ADAPTATION (recorded before any R3 API calls):
+R2 forecasters have high attrition, notably output-budget exhaustion; observed
+actor outputs also show reasoning followed by JSON rather than pure JSON.
+R3 uses a single puzzle per forecast and offers exactly two legal moves: the
+certified nonstatic bad push and the first action of an independently verified
+winning plan. The actor rules omit R2's extra warning about blocking access.
+Its primary task remains preserving solvability after one irreversible choice.
+A deterministic parser accepts the final JSON response object after prose,
+without consulting correctness. Each forecaster returns only three trap
+probabilities, a brief mechanism and warning. Mechanism warnings are committed
+and filtered before actor outcomes. Four arms: baseline, generic caution,
+self-authored diagnostic, cyclic peer diagnostic. All arms are randomized in
+one fixed job manifest; no selection on baseline failure. 48 new discovery
+puzzles, bank indices 48..95, disjoint from R2. Match choice order across arms.
+H1 exploratory contrast: same-item self-versus-peer Brier advantage.
+H2 exploratory contrast: safe-choice improvement, self warning vs generic.
+These differ from original free-form puzzle invention and must be labeled so.
+The three models and token budgets remain fixed. More orchestration threads
+avoid idle workers waiting on per-model semaphores; API concurrency remains
+at most two requests per model and six overall.
+
+R3 pre-data amendment: reduce the game to 6x6 with exactly two boxes and
+3-8 optimal pushes, using an independent small-bank generator. R2's full-size
+nonstatic puzzles exhaust the larger deployments' output budget, while a
+format-only audit recovers many Gemma final choices after prose. None of the
+R3 games have yet been sent to actors or forecasters. Use small-bank indices
+0..47 for discovery and reserve indices 48..143 as fresh holdout candidates.
+The parser accepts the final explicit JSON choice/forecast object after prose;
+this normalization never consults the correct action. It is fixed before R3.
+R3 final pre-data contract clarification: ask for the best decision even if
+uncertain, without requiring a full proof. Accept the final explicit JSON
+choice field even when the object contains explanatory fields. This prevents
+format-only noncompliance being scored as an inability to choose. No R3 API
+calls have run at this point.
+
+R4 RESOURCE/HARNESS CONTROL (planned before R4 API calls):
+R3's 4,000-token numeric-forecast task still has severe completion attrition
+in Qwen/GLM. An inspected returned reasoning trace spends the cap checking
+geometry and refining advice despite the supplied certified witness. This
+cannot support a test of self-specific forecasting. After completing the
+fixed R3 forecast batch, do not launch its actor experiment if either larger
+model has <80% valid forecasts; no R3 actor outcomes have been examined.
+Try 8,000-token forecaster/actor bounds and official stream=True to avoid the
+nonstreaming gateway deadline, with a 180-second total stream limit. This is
+an operating-point feasibility control, not a claim that a budget change
+caused an epistemic improvement. Restore challenging 7x7 binary-choice games.
+Use large-bank puzzle48 for an excluded pipeline probe; if workable, puzzles
+49..72 form a 24-item discovery batch; fresh puzzles73..168 are reserved for
+one fixed confirmatory batch. Revise this allocation only before any respective
+actor outcomes and record the reason. All failure/timeout costs remain held.
+
+R4 pre-discovery decisions after the excluded one-puzzle stream probe:
+Qwen returned a valid forecast at 5,065 generated tokens (64.5s); Gemma returned
+one quickly; GLM still exhausted8,000 tokens. Probe actor outputs show budget
+exhaustion is distinct from committing the certified wrong move. Therefore:
+- Use Qwen and Gemma for the primary paired study; preserve GLM feasibility data
+  and make no general claim about all models. Exclusion is based on forecast
+  completion feasibility, before any discovery/confirmation actor outcomes.
+- Collect BOTH p_trap and p_safe. Nonresponse cannot masquerade as safe behavior
+  or as evidence that a model correctly avoids its own predicted mistake.
+- Use 48 discovery puzzles, large-bankindices49..96, excluding probepuzzle48.
+- Reserve fresh large-bankindices97..192 (96puzzles) initially forconfirmation;
+  choose/freeze final holdoutsize andprimarycontrast before accessingholdout.
+- Raise per-model API concurrency to3 for these TWO deployments: still6overall.
+  Keep 8,000tokenlimits and180s streamingcap, fresh contexts, fixed randomization.
+- Primary original constructive hypothesis remains unconfirmed. Adapted Brier
+  superiority needs a discovery-fitted per-author/target base-rate correction
+  on holdout to distinguish global self-optimism from item-specific insight.
+- Diagnostic-vs-generic safe-choice effects are a separate hypothesis, not
+  confirmation that a model can invent self-specific traps. All changes remain
+  exploratory until a fresh fixed holdout is frozen.
+
+R4 discovery control added before ANY R4 discovery actor outcomes:
+Add a shuffled-warning arm using a derangement of the same author's approved
+warnings across puzzles. This matches source/style distribution while removing
+case alignment; it tests whether an apparent benefit comes from generic
+steering instead of a case-specific diagnosis. No condition/source label is
+shown to actors. All warnings and the derangement are fixed before solving.
+A positive self-vs-generic effect alone will not establish useful case-specific
+metaknowledge if shuffled advice works equally well. Discovery has five arms;
+confirmation can omit the peer-advice arm if not needed for its frozen claim.
+
+R4 analysis specification, recorded before any discovery actor calls:
+Use target-only forecast ranking for the constructive selection statistic:
+within each prespecified four-puzzle slate, each author selects the candidate
+with highest p_trap for the assigned target. Evaluate actual target error minus
+peer error afterward; D compares self vs peer authors' specificity. This avoids
+requiring accurate peer forecasts just to exploit one's own risk knowledge.
+A synthetic sanity check shows forecast-margin selection can discard genuine
+self information when peer predictions are poor. Retain the earlier margin
+criterion as an explicitly secondary robustness calculation, not a preferred
+result selected after outcomes. Also report self-vs-peer safe-choice Brier
+loss, corrected for per-author/target average forecasts and target base rates;
+confirmation corrections, if used, must be fitted on discovery only. A low
+wrong-move rate caused by failing to answer is not successful safe behavior.
+
+Additional exploratory failure-class contrast, specified before inspecting
+R4 arm/selection comparisons: use failure signatures from the separate R2
+feasibility round (Qwen:invalid/absent finaldecision;Gemma:committedbadmove).
+Select each target's highest predicted probability of its prespecified class,
+then measure that SAMEclass in target vs peer actors. Qwen class probability
+is1-p_safe-p_trap; Gemma class is p_trap. This distinguishes budget
+noncompletion from an actual wrongmove. It is an adapted exploratory question,
+not a retrospective redefinition of the original wrongpush primary. A fresh
+fixed confirmation would be needed if this is the only promising contrast.
+
+R5 FROZEN FOLLOW-UP, chosen after the complete fixed R4 discovery batch:
+R4 D=0 (eight complete slates); raw self-safe Brier advantage=-.0539,
+centered advantage=-.0066. Self advice vs generic +.0833, CI crossing zero;
+shuffled vs generic +.1563. Original constructive superiority remains unsupported.
+The strong new lead is prospective success overconfidence: Qwen predicts.765
+safe submissions versus.227 observed on its44 valid forecasts. An exploratory
+historical-rate comparison outperforms self forecasts by approximately.15 Brier.
+Choose ONE new confirmatory primary: frozen track-record versus self forecasting,
+with128 fresh worlds and baseline actors only. Reference uses all48 R4 baseline
+outcomes (.26 Qwen,.54 Gemma after Laplace smoothing), not follow-up outcomes.
+Protocol: reports/holdout_protocol.txt; estimator: confirmatory_analysis.py.
+Both were written and checked with temporary synthetic data before any R5 API
+call. All other analyses are descriptive/secondary. This tests the usefulness of
+the epistemic benchmark, rather than proving free-form puzzle invention or
+privileged self-knowledge. Retain every negative earlier round.
+
+R5 secondary information-boundary ablation, before any R5 actor outcomes:
+Related-work checks found strong precedents for generic self-reports and
+history-based correctness prediction. Test a narrower causal lead: private
+access to a correct answer may distort forecasts about a solver that will
+not receive that answer. Gemma forecasts all128 R5 worlds in two randomized
+fresh-context arms with identical actor input/resources: reference visible
+versus absent. All256 companion forecasts must precede R5 actor calls. Reuse
+the same future baseline outcomes; do not add solver calls or alter the frozen
+primary. Protocol: reports/answer_visibility_protocol.txt. This is prospective
+exploration and remains secondary whatever its p-value or direction.
+
+Posthoc R4 position diagnostic during the fixed follow-up forecast batch:
+Gemma chooses A35/48 in baseline; the safe move is A23/48. Qwen's12 submitted
+baseline moves split6A/6B, with36 noncompletions. This is a prompt/order
+limitation, not a new hypothesis test. Do not change the fixed R5 prompts,
+sample, primary or companion protocol using this diagnostic. One randomized
+orientation per world supports the declared marginal prediction experiment;
+it does not establish label-order invariance or a complete game-solving skill.
+
+Auxiliary ablation transport/feasibility interruption before ANY R5 actors:
+The original nested-input prompt is stopped after20 completed calls:5 valid,
+12 transport failures (HTTP504 or incomplete chunked stream),3 no-final-object
+responses. Three other in-flight calls retain unknown outcomes/billing; their
+ledger status becomes interrupted_unknown, never zero-cost or silently retried.
+Both excluded service probes complete in~1second, including an8,000-token-cap
+old actor request. Preserve the original partial data; it is not efficacy data.
+
+Use a compact first-pass forecast profile: plain state/choices and game rules,
+explicitly no solving/proving,512 forecaster output tokens. The target actors
+and frozen primary still have8,000 tokens/180seconds and are unchanged. An
+excluded4-call R4 probe returns4/4 valid forecasts before proceeding. Full
+compact profile keeps all128 R5 worlds/two information arms and is secondary.
+Protocol:reports/compact_visibility_protocol.txt. No forecast probability
+values or future actor outcomes determined this feasibility adaptation.
+
+429 admission recovery before any observed R5 actor outcomes:
+Unpaced compact profile produced25 valid forecasts then231 HTTP429 rejections.
+Every one of the256 baseline actor requests was also rejected with429, yielding
+ZERO observed decisions. An explicit all-missing primary summary performs no
+test. Archive all receipts/aggregates, retain the25 valid compact forecasts,
+and recover only rejected cells. Add global20-starts/minute pacing and65second
+cooldowns. At most2 extra429 admission attempts get separate receipts/ledger
+entries and a full fresh180second generation bound once admitted. No other
+failure or any model response is retried. Original interrupted requests remain
+unknown and unreplayed. Protocol:reports/transport_recovery_protocol.txt.
+Original primary sample,prompts,forecast freeze,reference and test are unchanged;
+this is the first observable realization, not a repeated significance attempt.
+
+Derived secondary decision check, specified during R5 collection without
+inspecting any of its actual decisions: compare argmax own p_safe with argmax
+frozen historical rate as solver-selection rules. Tie-break own forecasts by
+historical rate. Commit124 eligible world selections using forecasts only,
+then evaluate their success after the entire fixed primary finishes. This is
+exploratory, not another primary; both potential solver outcomes are already
+being collected, so it adds no API calls. Code:routing_diagnostic.py; plan:
+r5_holdout/routing_plan.json. Report the result in either direction.

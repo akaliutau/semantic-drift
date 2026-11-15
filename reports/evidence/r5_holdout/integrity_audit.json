@@ -1,0 +1,1 @@
+{"actor_calls_after_freeze": true, "actor_inputs_checked": 256, "efficacy_outcomes_inspected": false, "fixed_actor_jobs": 256, "freeze_hashes_match": true, "puzzles": 128, "recovery_inputs_equal_rejected_inputs": true, "round": "r5_holdout"}

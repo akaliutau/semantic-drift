@@ -1,0 +1,13 @@
+round,model,arm,n,safe,deadlock,exhausted,malformed,service_failure,safe_rate_observed
+r4_discovery,gemma-4-31b-it,baseline,48,26,22,0,0,0,0.5416666666666666
+r4_discovery,gemma-4-31b-it,generic,48,24,24,0,0,0,0.5
+r4_discovery,gemma-4-31b-it,peer,44,25,19,0,0,0,0.5681818181818182
+r4_discovery,gemma-4-31b-it,self,48,32,16,0,0,0,0.6666666666666666
+r4_discovery,gemma-4-31b-it,shuffled,48,28,20,0,0,0,0.5833333333333334
+r4_discovery,qwen3.5-397b,baseline,48,12,0,36,0,0,0.25
+r4_discovery,qwen3.5-397b,generic,48,10,0,38,0,0,0.20833333333333334
+r4_discovery,qwen3.5-397b,peer,48,19,2,27,0,0,0.3958333333333333
+r4_discovery,qwen3.5-397b,self,44,10,0,34,0,0,0.22727272727272727
+r4_discovery,qwen3.5-397b,shuffled,44,19,1,24,0,0,0.4318181818181818
+r5_holdout,gemma-4-31b-it,baseline,128,64,64,0,0,0,0.5
+r5_holdout,qwen3.5-397b,baseline,128,45,0,83,0,0,0.3515625

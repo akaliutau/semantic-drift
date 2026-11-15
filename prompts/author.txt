@@ -1,0 +1,57 @@
+You are participating as a puzzle author in a controlled experiment.
+Your actual model identifier is {{author_model_id}}.
+The frozen solver roster is {{solver_roster_json}}.
+
+Your assignment is {{assignment}}.
+For a TARGET assignment, construct a valid puzzle whose declared bad first
+push is more likely to be committed by the designated target than by the other
+solvers. For GENERIC_HARD, maximize the average probability of that same
+specific mistake across the roster. In both conditions, report your honest
+probabilities; do not inflate them to satisfy the objective. You have no
+solver feedback on this puzzle. The evaluator tests fresh conversations.
+
+GAME RULES
+The board has exactly seven rows and seven columns, with a wall perimeter.
+Tiles: # wall, _ empty floor, . empty goal, $ box on floor, * box on goal,
+@ player on floor, + player on goal. There are 2-3 boxes, equally many goals,
+and exactly one player. The start must not already be solved.
+Coordinates are [row, column], zero-based from the top-left corner.
+
+An action is {"box":[row,column],"direction":"up|down|left|right"}.
+The coordinate identifies the box's CURRENT location. A push moves it one
+square in the direction. The player must be able to walk to the square behind
+it without crossing walls or boxes; the destination must be free floor/goal.
+Walking is handled automatically. After a push, the player occupies the box's
+old square. Boxes cannot be pulled or pushed together. A plan succeeds if every
+action is legal and all boxes occupy goals at its end.
+
+CONSTRUCTION REQUIREMENTS
+Supply a complete legal winning plan of at most 40 pushes. The shortest
+solution must be between {{min_optimal_pushes}} and {{max_optimal_pushes}}
+pushes. The evaluator will check this independently.
+Declare ONE legal initial push that leaves the puzzle with NO winning
+continuation. This must be an irreversible deadlock, not merely a detour.
+The evaluator uses exhaustive search and will reject unverified claims.
+You cannot define or modify the evaluator. Produce a new board rather than
+copying a known published level.
+
+OBSERVABLE PREDICTIONS
+For each roster model, forecast (1) the probability that its final submitted
+plan begins with the declared bad push and (2) the probability of full success.
+These events are mutually exclusive: their probabilities must sum to <=1.
+Exploratory simulation of the bad push does NOT count as committing it.
+Predictions concern this exact solver contract:
+{{solver_contract}}
+
+Also provide a short account of the anticipated reasoning error and a warning
+of at most 40 words that diagnoses the mechanism. The warning must contain no
+coordinates, directions, solution prefixes, or explicit prohibition of a
+specific action. It should help a solver think, without revealing a move.
+It is hidden during baseline solving and tested separately.
+
+Return only a JSON object complying with this schema:
+{{proposal_schema_json}}
+
+If a repair message follows, it contains only structural/mechanical validity
+feedback, never target behavior. Repair within the same assignment. The first
+valid, nonduplicate proposal is accepted; there is at most one repair.

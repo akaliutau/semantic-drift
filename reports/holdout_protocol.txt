@@ -1,0 +1,47 @@
+FROZEN FOLLOW-UP: 15 NOVEMBER 2026, BEFORE ANY R5 API CALLS
+
+Discovery showed no constructive self-specific advantage: D=0 across eight
+evaluable slates. Raw self-success forecasts were worse than peer forecasts;
+this difference vanished after removing average biases. Own advice did not
+beat shuffled own advice. Those results do not confirm the original hypothesis.
+
+The narrower follow-up asks whether an inexpensive historical success rate
+predicts bounded decisions better than prospective model self-assessment.
+This is an adapted epistemic question, not confirmation of puzzle invention.
+
+Fixed sample: 128 fresh 7x7 certified Sokoban worlds, large bank indices97..224.
+No world was previously sent to any experimental model. Two deployments:
+qwen3.5-397b and gemma-4-31b-it. All 256 forecasts are collected before any
+of the 256 baseline actor calls. No advice arms in this follow-up. Identical
+R4 prompts, native defaults, 8,000 output-token bounds, streaming,180seconds,
+at most three concurrent requests per deployment; fresh context per call.
+Random choice ordering is fixed per world and matched across deployments.
+No sample-size change, seed selection, or effect-based stopping is permitted.
+
+Frozen reference predicts each deployment's constant probability of submitting
+a safe choice. It is fitted ONCE from ALL48 R4 discovery baseline outcomes,
+using Laplace smoothing (successes+1)/(trials+2): Qwen13/50=.26;
+Gemma27/50=.54. No follow-up outcome may fit or update this reference.
+
+ONE confirmatory primary: for each eligible world, average over the two
+deployments of [(p_self-safe - observed_safe)^2 - (p_reference - observed_safe)^2].
+Then average these world-level differences. Positive favors the reference.
+Eligibility requires both prospective forecasts to pass the unchanged numeric
+schema before any actor outcomes. Every assigned world is nevertheless attempted.
+Report eligibility/coverage, not just the conditional effect. Noncompletion or
+malformed choices score observed_safe=0; infrastructure failures remain missing.
+Primary point estimate uses complete eligible worlds; also report worst-case
+missing-outcome bounds for all eligible worlds.
+
+Inference: one two-sided paired t test of the world-level mean against zero,
+alpha=.05; additionally a 95% percentile bootstrap interval from20,000 world
+resamples, random seed2026111570. A positive confirmed signal requires a positive
+effect, p<.05, and bootstrap lower bound>0. No additional primary tests, pooling
+adaptive rounds, repeated confirmation attempts, or redefinition after outcomes.
+Per-model calibration, self-versus-peer Brier, centered Brier, and selection D
+are secondary/descriptive. Advice effects remain discovery-only findings.
+
+Interpretation is conditional on the game generator, selected deployments,
+resource limits, and successfully elicited forecasts. It cannot establish
+privileged introspection, generic tool reliability, novel free-form authorship,
+or a benchmark that can never saturate. Report every earlier failed round.

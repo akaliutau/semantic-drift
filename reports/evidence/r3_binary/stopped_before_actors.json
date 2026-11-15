@@ -1,0 +1,1 @@
+{"actor_calls": 0, "gemma_valid": 48, "glm_valid": 0, "interpretation": "Completion feasibility failure, not a test or rejection of self-specific knowledge.", "qwen_valid": 0, "reason": "Exploratory stop after 0/48 valid forecasts in Qwen and 0/48 in GLM; the 80% per-model gate was adopted after reviewing forecast attrition, before any R3 actor outcomes"}

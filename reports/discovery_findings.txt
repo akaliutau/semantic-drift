@@ -1,0 +1,67 @@
+DISCOVERY FINDINGS -- EXPLORATORY, FOLLOW-UP STILL RUNNING
+15 November 2026
+
+Original hypothesis: models can prospectively target a particular mistake in
+their own fresh solver more specifically than peer forecasters can. The pilot
+has not supported this claim. It has exposed a substantial resource-bounded
+self-forecasting error worth testing independently.
+
+All decisions are mechanically graded Sokoban first pushes. In the final
+operating point, exactly one of two offered moves preserves solvability. The
+bad move is exhaustively certified unsolvable, while its boxes remain on
+geometrically viable squares; avoiding ordinary dead corners is insufficient.
+Forecasters see the winning plan and trap; actors never see these certificates.
+Each API context is fresh. The studied deployments are Qwen3.5-397B and
+Gemma4-31B, with native defaults,8,000 output tokens,180sec, no actor tools.
+
+Earlier attempts retained:
+- Free-form authoring:0/12 valid puzzles. A fence-normalization audit still
+  finds0/14 completed proposals valid. Failures include syntax, geometry,
+  timeouts and output exhaustion. This is feasibility failure, not a test
+  establishing absence of self-knowledge.
+- Four-card workshop:48 worlds,16/36 valid forecast matrices. Qwen and GLM
+  exhaust all48 actor responses each. A posthoc format-only audit recovers
+ 39/48 safe Gemma choices and9 wrong choices. The strict parser had classified
+  most of these as malformed; final-JSON parsing is fixed before later rounds.
+- Smaller binary games:Gemma48/48 valid forecasts; Qwen/GLM0/48. The round
+  stops before actor calls because forecasts cannot be elicited reliably.
+- Excluded streaming probe:one world; Qwen finally completes a forecast at
+ 5,065 tokens and64.5sec, Gemma also completes, GLM still exhausts8,000 tokens.
+  GLM is excluded for feasibility before the discovery actor outcomes.
+
+Final discovery:48 fresh worlds,92/96 valid forecasts,468 actor calls.
+All forecasts, warnings and randomized conditions are fixed before solving.
+Input/hash/timestamp audits pass. No infrastructure outcomes are missing.
+
+                    Qwen safe        Gemma safe
+No advice              12/48             26/48
+Generic caution        10/48             24/48
+Own diagnosis          10/44             32/48
+Peer diagnosis         19/48             25/44
+Shuffled own advice    19/44             28/48
+
+Own-versus-peer puzzle-selection specificity D=0; eight evaluable four-world
+slates,95% bootstrap interval[-.25,.25]. Raw own-success Brier advantage is
+-.0539[-.0849,-.0211], but centered advantage is-.0066[-.0283,.0157]. The raw
+disadvantage is largely an average-forecast bias; it is not evidence about
+privileged internal access.
+
+Own advice minus generic caution is+8.3 percentage points[-4.2,+19.8], while
+shuffled advice minus generic is+15.6[+6.3,+25.0]. Own advice minus shuffled
+is-7.3[-18.8,+3.1]. These are puzzle-weighted paired exploratory comparisons,
+with eligibility differences visible in the table; intervals are unadjusted.
+They do not demonstrate a benefit from case-specific self-diagnosis. Shuffling
+tests alignment, not whether a general planning principle is true. Warning
+review checked prohibited answer hints, not causal correctness of mechanisms.
+
+Qwen's own valid forecasts average76.5% safe submission; actual rate is22.7%
+on those44 worlds. Of all48 baseline worlds,36 exhaust output,12 are safe and
+none commit the bad move. Noncompletion must not be called a committed error.
+Gemma's own forecasts average67.9% against54.2% observed. An exploratory
+historical-rate baseline improves average Brier by about.15; the frozen fresh
+follow-up is required before claiming that this lead replicates.
+
+At discovery completion:941 API attempts,10.57655 provider-reported credits;
+unknown-billing reserve1.66882 credits. The190-credit study cap remains in force.
+No research code or data is merged into main. Full receipts remain in runs/study;
+aggregate evidence is exported under reports/evidence on the research branch.

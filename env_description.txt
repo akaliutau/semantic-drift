@@ -1,0 +1,11 @@
+- local python env is anthr and contains basic deps. However, we can use the mapping of remove Modal instance via Skyrun (installed latest ver = 0.1.9 and modal is authorized) see https://github.com/akaliutau/skyrun for details how to run local project code and get results back. Note, you can create permanent volumes, but avoid to store more than 10GB
+- we have created a Hugging Face token in .env with generous R/W rights, but use carefully; this token is created in our Modal env as well, under name hugging-face
+- there is a similar kaggle-api-token, with Read access
+- there is a similar adaption-api-token, with Read/Write access
+- you can install anything in local env - check locally before adding to cloud env to avoid useless tests at Modal.
+- if not heavy cpu is needed, you can run some processing locally
+- use cloud resources wisely, use the cheapest ver of GPU - T4, use CPU if heavy training/inference not needed.
+- write structured code. use re-usable parts to avoid too much duplication, but structure code as we are writing a textbook.
+- use git to commit stable code and versions of code - after each response create a branch and ask use to merge
+- do NOT overengineer or write complex code - write as EASY as possible, use patterns, use DRY principles, write minimal stable code that handles all errors and that's all - no fallbacks, etc
+

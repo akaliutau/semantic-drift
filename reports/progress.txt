@@ -1,0 +1,23 @@
+MICRO-STUDY COMPLETE — 15 NOVEMBER 2026
+
+No API process remains active. The fixed holdout finished and all results were
+analysed. Report:reports/microresearch_report.txt. Branch:research/micro-20261115;
+keep research code/evidence outside main.
+
+Primary:124 eligible fresh worlds out of128; self-minus-history Brier=.1056883,
+95%CI[.0590913,.1516230],two-sided paired t p=1.80155e-5. History reference wins.
+Original self-specific puzzle invention remains unconfirmed. Compact answer-
+visibility ablation is null; secondary routing favors history50% vs self35.5%.
+All128x2 final actor outputs observed; all83 Qwen incomplete responses use8000
+output tokens with no final choice. No transport errors in paced recovery.
+
+Budget:16.55575685 provider-reported credits +10.77205464 conservative unknown
+reserve=27.32781149 against190 cap.2225 total API attempts. All429 rejections,
+504/connection failures and3 interrupted unknown requests are retained. Zero
+actor outcomes were obtained in the rejected initial panel; no test was done.
+Only transport-rejected cells were recovered, with fixed prompts/sample/test.
+
+Aggregates/protocols/source snapshots:reports/evidence. Full local receipts:
+runs/study. Reproduction instructions:reports/reproduce.txt. Earlier narrative
+and protocols remain in adaptations.txt and reports/*protocol.txt. Offline
+analysis commands need no API. Do not rerun live collection to reproduce stats.

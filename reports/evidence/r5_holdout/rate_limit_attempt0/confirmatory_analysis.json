@@ -1,0 +1,1 @@
+{"assigned_puzzles": 128, "bootstrap_ci_95": null, "complete_primary_puzzles": 0, "effect": null, "forecast_eligible_puzzles": 124, "missing_outcome_bounds": [-0.2998762096774194, 0.36101088709677415], "paired_t_p_two_sided": null, "primary_positive": null, "reason": "Insufficient observed actor outcomes; no statistical test performed", "round": "r5_holdout"}

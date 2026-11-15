@@ -1,0 +1,1 @@
+[{"model": "glm-5.2", "seconds": 12.274598174999483, "status": "correct", "success": true, "tools": 1}, {"model": "qwen3.5-397b", "seconds": 15.926371469000514, "status": "correct", "success": true, "tools": 1}, {"model": "gemma-4-31b-it", "seconds": 42.034183416000815, "status": "exhausted", "success": false, "tools": 2}]

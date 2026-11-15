@@ -1,0 +1,98 @@
+SELFTRAP MICRO-STUDY — 15 NOVEMBER 2026
+
+A narrower epistemic result replicated: models overestimate their ability to
+submit a safe decision under stated resource limits. Their previous success
+rate predicts fresh performance better than their own prospective forecasts.
+Self-specific puzzle invention remains unconfirmed; this pilot does not yet
+justify a high-novelty or “never saturates” claim.
+
+The test uses certified Sokoban worlds. Actors choose between two legal first
+pushes: one preserves solvability; the other makes the world unsolvable.
+Independent exhaustive search certifies the trap; a separate grid executor
+checks the winning witness. Forecasters see the certificates, fresh actors do
+not. The outcome is a completed safe first choice, not a full-game solution.
+Actors use native defaults, no tools, 8,000 output tokens and a 180-second
+request bound. Wrong moves, output exhaustion and service failures stay separate.
+
+The ONE locally frozen follow-up primary used 128 fresh worlds and 256 actor
+calls. Forecasts were committed before solving: 252/256 were valid, giving
+124 worlds with both forecasts eligible. All final actor outputs were observed.
+Inference clusters the two deployments within each shared world.
+
+                       Own forecast     Observed safe choice
+Qwen 3.5 (397B)            76.4%            36.3% (45/124)
+Gemma 4 (31B)             69.6%            50.0% (62/124)
+
+The reference probabilities, .26 and .54, were fitted once from all 48 preceding
+discovery worlds with Laplace smoothing. Fresh-world mean Brier loss was .3524
+for self-forecasts versus .2467 for this reference; lower is better. The
+predeclared difference was +.1057, 95% world-bootstrap CI [.0591, .1516],
+two-sided paired t-test p=1.80e-5. This confirms the adapted forecasting claim.
+
+Across ALL 128 worlds per deployment, Qwen made 45 safe submissions and exhausted
+its output budget on 83; it committed no bad pushes. All 83 exhausted responses
+used exactly 8,000 tokens and contained no parseable final choice. Gemma made
+64 safe submissions and 64 bad pushes. This is a harness-specific result.
+
+A secondary routing check makes the decision consequence concrete. Choosing the
+solver with the higher self-rating yielded 44/124 safe decisions (35.5%);
+choosing from historical rates yielded 62/124 (50.0%): +14.5 percentage points,
+exploratory CI [4.0, 25.0]. The rule was recorded during collection using only
+locked forecasts, without inspecting actor outcomes. It adds no API calls and
+is not another confirmatory primary.
+
+All earlier attempts and negative findings were retained:
+
+* Free-form authoring: 0/12 slots passed mechanical eligibility; a format-only
+  audit still found 0/14 completed proposals eligible. This is a feasibility
+  failure, not a successful test of the invention hypothesis.
+* Four-puzzle workshop: 48 worlds, 16/36 valid forecast matrices. Qwen and GLM
+  exhausted all 48 actor outputs each. A posthoc final-JSON audit recovered
+  39/48 safe Gemma choices, versus about 28 expected from uniform legal moves.
+* Smaller binary worlds: Gemma produced 48/48 valid forecasts; Qwen/GLM 0/48.
+  Stopped before actors. An excluded streaming/8,000-token probe made Qwen
+  feasible; GLM remained infeasible and was excluded before discovery solving.
+* Final discovery: 48 worlds, 92/96 valid forecasts, 468 decisions. Own advice
+  versus generic caution improved safe decisions by 8.3pp, CI [-4.2, 19.8];
+  shuffled advice improved them by 15.6pp, CI [6.3, 25.0]. These exploratory
+  comparisons do not establish case-specific self-diagnosis. Shuffled advice
+  can contain true general principles; warning review checked answer hints,
+  not causal truth.
+* Self-specific selection stayed uncertain: discovery D=0 over 8 slates;
+  follow-up secondary D=.125, CI [-.054, .304], over 28 slates. The held-out
+  self-versus-peer Brier advantage after discovery-fitted bias correction was
+  -.0082, CI [-.0232, .0063]. Neither establishes a self advantage.
+* Answer visibility: all 256 compact Gemma forecasts on 128 paired worlds were
+  valid. Showing the forecaster the certified answer did not clearly change
+  forecast quality: gold-minus-no-gold Brier=-.0085, CI [-.0262, .0093],
+  exploratory p=.345. Forecasters had 512 output tokens; actors retained 8,000.
+
+Transport failures were never scored as wrong model answers. The initial
+answer-visibility version stopped after 20 completed calls: 5 valid forecasts,
+12 transport failures and 3 without final forecasts; 3 interrupted calls remain
+unknown. A later unpaced batch hit 429 limits, and all 256 initial actor requests
+were rejected: ZERO decisions and no primary test. All artifacts were archived.
+Only 429-rejected cells were recovered with pacing and bounded admission retries.
+Actual model responses were never retried. Recovery had zero transport errors;
+audits confirm identical inputs. The sample, original forecasts, reference and
+primary test stayed unchanged. Detailed protocols document both interruptions.
+
+Total: 2,225 API attempts; 918,654 input and 4,643,418 output tokens. Reported cost
+is 16.55576 credits, plus a conservative 10.77205-credit unknown-billing reserve:
+27.32781 accounted credits against the 190-credit cap. No separately billed
+compute resources or non-sponsor paid API were used.
+
+Recommendation: keep the prospective, mechanically scored forecasting and
+routing benchmark. Do not scale the current free-form authorship story as
+proof of special self-knowledge. Two deployments, one game family, native
+settings and first-move outcomes limit generalization; equal token bounds are
+not equal compute. New seeds do not establish domain transfer or non-saturation.
+Close prior work already covers generic self-reports, historical calibration,
+budgeted completion and failures on self-authored problems. Novelty remains
+limited; see related_work_update.txt for the verified references.
+
+Primary protocol: holdout_protocol.txt. Fuller discovery: discovery_findings.txt.
+Aggregates/protocols: reports/evidence; full receipts: runs/study.
+Figure: prospective_forecasts.png/.pdf. Tables: actor_counts.csv and
+forecast_calibration.csv. Branch: research/micro-20261115, isolated at
+/media/DATA/repos-research/apart1/runs/microresearch. Nothing was merged into main.

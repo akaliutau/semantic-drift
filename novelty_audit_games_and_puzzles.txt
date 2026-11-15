@@ -1,0 +1,308 @@
+NOVELTY AUDIT: GAMES, OPEN WORLDS, AND SELF-GENERATED PUZZLES
+Research date: 15 November 2026
+
+Purpose: identify a concise, genuinely original contribution for the
+AI x Epistemics sprint. Platforms below are implementation options, not
+claims of novel research. Scores are conditional forecasts, not results.
+
+DECISION
+
+Do not pitch generic game generalization, hidden physics changes, automatic
+problem generation, or an endless benchmark as the main novelty. Close
+precedents cover all four. A 15/15 submission needs a new consequential
+finding or evaluation method, convincingly demonstrated.
+
+"Never saturates" is not established by infinite seeds, larger boards,
+stronger opponents, or an unbounded score. A generator may admit a general
+solution; an adaptive adversary may merely produce impossible tasks.
+Use "renewable evaluation" and demonstrate successive useful challenges.
+Freeze common evaluation batches, retain earlier anchor tasks, and report
+performance at explicit resource budgets. Different personalized challenges
+do not automatically yield comparable model rankings.
+
+CLOSE PRECEDENTS THAT RULE OUT BROAD NOVELTY CLAIMS
+
+1. Enhanced POET generates novel challenges and transfers solutions.
+   Open-ended challenge generation is established research.
+   https://arxiv.org/abs/2003.08536
+
+2. PAIRED generates environments using a regret objective. Solvability and
+   suitable difficulty are already central concerns in environment design.
+   https://arxiv.org/abs/2012.02096
+
+3. OMNI-EPIC generates executable environments and reward functions using
+   foundation models, aiming for interesting, learnable new tasks.
+   https://arxiv.org/abs/2405.15568
+
+4. Factorio Learning Environment explicitly motivates open-ended coding
+   tasks by benchmark saturation. Agents construct factories through code;
+   production throughput supplies the outcome measure.
+   https://arxiv.org/abs/2503.09617
+
+5. NovelGym evaluates agents before novelty, immediately after novelty,
+   during adaptation, and after adaptation. Recovery time and performance
+   loss are established measurements, not our proposed invention.
+   https://arxiv.org/abs/2401.03546
+
+6. NovPhy applies physical novelties to Angry Birds-style scenarios and
+   evaluates detection and adaptation. New physical rules in games are
+   already a benchmark topic.
+   https://arxiv.org/abs/2303.01711
+
+7. PACE-Bench is especially close to Round 6: successful executable physical
+   designs fail after hidden environment changes and agents revise them.
+   Its analysis includes fixation, stagnation, search, and memory effects.
+   It also compares hidden versus disclosed changes and richer feedback.
+   Merely adding code repair, physics shifts, or escape strategies is weak.
+   https://arxiv.org/abs/2608.14441
+
+8. Automated Capability Discovery uses a model to generate tasks probing
+   another model or itself. "AI invents tests of its own weaknesses" alone
+   is insufficient novelty.
+   https://arxiv.org/abs/2502.07577
+
+9. Open-Endedness Bench audits hypotheses, experiments, and revision from
+   research-agent execution records. General epistemic process scoring
+   without a reference solution is already proposed.
+   https://arxiv.org/abs/2610.02588
+
+10. MathDuels generates mathematical problems, evaluates other models on
+    them, and refreshes difficulty as participants improve. Appendix C.3
+    explicitly documents authors supplying wrong answers to valid problems
+    they created. Its main solve matrix excludes self-authored attempts.
+    https://arxiv.org/html/2604.21916v3
+
+11. Absolute Zero trains a proposer/solver using executable verification.
+    Self-Challenging Language Model Agents generates tool-use tasks with
+    verification functions and example solutions/failures. VHG combines
+    problem validity and difficulty in a setter/solver/verifier scheme.
+    https://arxiv.org/abs/2505.03335
+    https://arxiv.org/abs/2506.01716
+    https://arxiv.org/abs/2605.06660
+
+WORLD/ENGINE MAP
+
+The feasibility judgments are our assessments from papers and documentation;
+installation and integration were not tested.
+
+- Generalized n-by-n chess: useful for scaling search, but larger boards do
+  not isolate epistemics. Hidden or changing rules require a custom protocol.
+  Fairy-Stockfish supports configurable variants; do not assume its current
+  implementation supports arbitrary board sizes. Ludii offers broader games.
+  https://github.com/fairy-stockfish/Fairy-Stockfish/wiki/Variant-configuration
+  https://ludii.games/
+
+- OpenSpiel: useful for small board/card games and imperfect-information
+  controls. Unknown state and unknown rules are different experimental axes.
+  https://openspiel.readthedocs.io/en/stable/games.html
+
+- TextArena: existing competitive text games; useful for rapid integration
+  and cross-model play, but game competition alone is not a new contribution.
+  https://arxiv.org/abs/2504.11442
+
+- Atari/ALE: recognizable games with existing mode/difficulty variants.
+  Standard versions mainly introduce perception/control confounds here.
+  https://ale.farama.org/v0.10.0/environments/
+
+- OCAtari + HackAtari: structured object observations and modifications to
+  existing Atari games. Good demonstration substrate; new mechanics and
+  observation contracts still require careful implementation.
+  https://github.com/k4ntz/OC_Atari
+  https://github.com/k4ntz/HackAtari
+
+- JAXtari: modifiable Atari reimplementations with structured observations.
+  Promising for many repeated tests; verify particular game coverage first.
+  https://arxiv.org/abs/2610.23650
+
+- Procgen: 16 procedurally generated games. New seeds mainly test transfer
+  within game families; the 2020 competition also introduced secret games.
+  Procedural levels alone do not establish new-rule generalization.
+  https://github.com/openai/procgen
+  https://openai.com/index/procgen-minerl-competitions/
+
+- GVGAI/VGDL and Griddly: useful for expressing many small games and changing
+  mechanics. Their general-game-playing objectives strongly overlap the
+  broad "universal harness" framing.
+  https://arxiv.org/abs/1802.10363
+  https://github.com/Bam4d/Griddly
+
+- Kinetix: strong substrate for varied 2D physics tasks and structured
+  observations. Its standard symbolic state includes physical properties;
+  an unknown-physics study must expose measurements without leaking the
+  latent parameters. Exotic new dynamics need engine extensions.
+  https://arxiv.org/abs/2410.23208
+  https://github.com/FLAIROx/Kinetix
+
+- PHYRE: clean physical puzzles, sample efficiency, and cross-template
+  generalization. Less natural for long sequences of autonomous code repair.
+  https://arxiv.org/abs/1908.05656
+
+- NovPhy/Science Birds: directly relevant existing physics-novelty testbed.
+  Prefer it as a baseline or source of mechanisms, not a novelty claim.
+  https://github.com/phy-q/NovPhy
+
+- XLand-MiniGrid: particularly suitable for symbolic unknown rules and
+  compositional task generation. Has ruleset generation, not merely random
+  maps. Keep internal rules/state separate from agent-visible observations.
+  https://arxiv.org/abs/2312.12044
+  https://github.com/dunnolab/xland-minigrid
+
+- Alchemy: latent causal structure, hypothesis testing, and action sequencing
+  already designed for meta-learning. An excellent epistemic control, but
+  rediscovering its core question would be incremental. Repository archived.
+  https://arxiv.org/abs/2102.02926
+  https://github.com/google-deepmind/dm_alchemy
+
+- Baba Is AI: directly tests manipulation and composition of game rules.
+  Public, manipulable rules differ from hidden rules inferred experimentally.
+  https://arxiv.org/abs/2407.13729
+
+- Crafter/Craftax: compact survival/crafting worlds; Craftax provides a fast
+  substrate. Procedural terrain does not by itself randomize causal laws.
+  https://arxiv.org/abs/2402.16801
+
+- MiniHack/NetHack: rich interactions, partial observability, and long play.
+  MiniHack supports controlled tasks; full NetHack introduces substantial
+  game-knowledge and horizon confounds. BALROG already bundles these games
+  with several other agent environments.
+  https://arxiv.org/abs/2109.13202
+  https://arxiv.org/abs/2411.13543
+
+- Minecraft: MineDojo supplies tasks/interfaces; Voyager is an agent, not
+  a new world engine. PAL supports modified Minecraft tasks. NovelCraft is
+  a dataset of novelty-containing trajectories, not a drop-in interactive
+  engine. Rich scope, high short-project integration and interpretation cost.
+  https://arxiv.org/abs/2206.08853
+  https://arxiv.org/abs/2305.16291
+  https://arxiv.org/abs/2301.11891
+  https://arxiv.org/abs/2206.11736
+
+- Factorio: excellent code-based long-horizon optimization, already explicitly
+  positioned against saturation. New scientific claim must concern a
+  particular epistemic mechanism, not factory size or continuous scoring.
+  https://github.com/JackHopkins/factorio-learning-environment
+
+- Neural MMO, Lux AI, Melting Pot: strong options for population/opponent
+  changes. Social strategy and opponent variation make a small causal study
+  harder; opponent co-evolution does not guarantee absolute progress.
+  https://arxiv.org/abs/2311.03736
+  https://www.lux-ai.org/
+  https://arxiv.org/abs/2211.13746
+
+- Zendo/Wason-style hidden-rule games: exceptionally clear for experimentation,
+  but already studied with LLMs, including FALSIFYBENCH. Generic confirmation
+  bias or rule discovery would not meet our novelty requirement.
+  https://arxiv.org/abs/2402.06025
+  https://arxiv.org/abs/2606.04751
+
+CURRENT PUZZLE CANDIDATE: CAN A MODEL ENGINEER ITS OWN PREDICTABLE MISTAKE?
+
+The basic generation-versus-solving gap is already covered. A sharper
+candidate asks whether a model can prospectively construct puzzles targeting
+its own particular failure, beyond generic task difficulty and general
+knowledge of other models' weaknesses.
+
+Protocol:
+1. Let author A create a small puzzle, a solution witness, an executable
+   prediction of the mistake a fresh A will make, and a probability forecast.
+2. Verify validity with an independently implemented fixed engine. The author
+   cannot define the checker that establishes whether its answer is correct.
+3. Test fresh instances of A and peer models under specified, matched solver
+   tool/budget conditions. Withhold the construction trace and solution.
+4. Compare self-targeting, targeting a peer, and generic-hard generation.
+   Give other authors the same target information; include procedural controls.
+5. Require a minimal matched control that removes the proposed trap. Use the
+   same grading rule for all variants and repeated solving runs.
+
+Primary no-feedback condition: author commits before seeing target outcomes.
+A separate feedback condition measures empirical adversarial search; its
+success alone is not evidence of privileged self-knowledge. Construction
+necessarily exercises some reasoning about the puzzle, so even positive
+results would establish functional prediction, not direct access to weights.
+
+The essential analysis is an author-target interaction after accounting for
+solver strength, puzzle family, and generic difficulty. A self-targeted puzzle
+that defeats everyone provides little evidence of self-specific insight.
+Report validity yield and all submitted attempts, not just successful traps.
+
+Example substrate: a small Sokoban board where a tempting first push causes
+an irreversible deadlock, while a verified short solution initially moves
+away from the apparent goal. The author predicts that a fresh version of
+itself will make that particular push. This is an illustrative hypothesis,
+not an observed model-specific weakness. Bound board size and solution length
+so arbitrary search explosion is not the source of difficulty. Circuit or
+finite-state puzzles provide a second mechanically checked family.
+
+A stronger follow-up provides the solver with the author's diagnostic warning
+but no answer, and tests whether it avoids the predicted error. Use a generic
+warning and an independently authored warning as controls; warnings can also
+prime the wrong action. Do not call failure without the warning a paradox:
+the author and solver were given different information.
+
+Closest additional work:
+- ACD already generates tests of a model, potentially itself (link above).
+- SwS uses observed failures to synthesize more training problems:
+  https://arxiv.org/abs/2506.08989
+- Individuated metacognition research distinguishes own competence from
+  generic difficulty. Our proposed contribution would be constructive,
+  prospective targeting of a particular error, with causal matched puzzles:
+  https://arxiv.org/abs/2605.24299
+
+Do not claim this is the first study of self-knowledge, self-challenging,
+model-specific adversarial examples, or generative evaluation. The targeted
+combination above is a candidate gap; absence of an exact search hit does
+not establish priority. Adding the self-authored diagonal to MathDuels alone
+would be too incremental for an innovation score of 5.
+
+15/15 PATH AND STOPPING RULE
+
+Potential exceptional result: models can reliably construct and predict their
+own specific errors, beyond peer authors and generic difficulty, but fail
+to use equally available diagnostic knowledge when acting; a small harness
+intervention repairs that gap on held-out puzzle families. This must be
+established empirically. A result showing only that hard puzzles are hard
+does not qualify.
+
+Innovation 5 requires a consequential new finding/method that survives the
+above comparisons. Execution 5 requires independent validity checks, repeated
+runs, matched budgets, multiple model families, held-out tests, and convincing
+causal controls. Clarity 5 is plausible with one small visible puzzle and one
+precise claim. None of these execution scores is earned by this proposal.
+
+Pilot before building an arena. If self-targeting offers no benefit over
+generic-hard generation, or effects depend on invalid/huge puzzles, do not
+continue under a claim of a new self-knowledge mechanism. A rigorous null can
+be informative, but does not automatically earn exceptional innovation.
+
+ALTERNATIVE GAP INVESTIGATED, NOT YET ENDORSED AS A 15/15 IDEA
+
+Could a model-designed harness discard observations that its own solver needs
+to revise a mistaken rule? Study self-authored measurement/summary code,
+generate bounded witness pairs it collapses, and restore only the missing
+information in a matched intervention. The candidate distinction is the
+agent causing this loss through its own software decisions.
+
+Strong overlap requires caution: LLM-IDEA already detects identifiability
+limits and ranks observation designs; memory research studies evidence loss;
+world-model work studies high predictive accuracy with poor decisions.
+https://arxiv.org/abs/2610.11253
+https://arxiv.org/abs/2606.10616
+https://arxiv.org/abs/2608.06953
+https://arxiv.org/abs/2607.14169
+
+A hand-constructed moving-gate example was checked with exact arithmetic:
+previous/current y=(-1,0) and (1,0) collapse to the same (position, speed
+magnitude)=(0,1), but have different next positions under constant velocity.
+With equal priors and only that summary, best one-step targeting success is
+1/2; retaining signed velocity permits success 1. This assumes no additional
+memory or observation distinguishes the two cases. It demonstrates possible
+information loss, not that LLMs actually create or persist with such tools.
+
+REVIEW STATUS
+
+Broad primary-source search across the listed families, followed by selected
+full-text methods/appendix inspection for the closest papers, including
+PACE-Bench, NovelGym, Kinetix, LLM-IDEA, OEB, and MathDuels. Many other entries
+were checked at abstract/repository/documentation level. This is not an
+exhaustive review or a certificate of novelty. No games were installed and no
+model evaluations were run. Original Round 6/7/8 files remain unchanged.

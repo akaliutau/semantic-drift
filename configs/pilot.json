@@ -1,0 +1,18 @@
+{
+  "phase": "pilot",
+  "seed": 20261115,
+  "slots_per_condition": 2,
+  "controls": 0,
+  "repeats": 1,
+  "credit_cap": 90,
+  "author_output_tokens": 8000,
+  "concurrency_per_model": 1,
+  "exclude_runs": [],
+  "models": [
+    {"id": "glm-5.2", "provider": "adaption", "input_per_million": 1.4, "output_per_million": 4.4, "unit": "credits", "settings": {}},
+    {"id": "qwen3.5-397b", "provider": "adaption", "input_per_million": 0.55, "output_per_million": 3.5, "unit": "credits", "settings": {}},
+    {"id": "deepseek-v4-flash", "provider": "adaption", "input_per_million": 0.045, "output_per_million": 0.14, "unit": "credits", "settings": {}}
+  ],
+  "validation": {"min_pushes": 6, "max_pushes": 30, "max_states": 100000, "timeout": 5.0},
+  "solver": {"max_requests": 3, "max_tool_calls": 2, "max_pushes": 40, "max_output_tokens": 4000, "wall_seconds": 180}
+}

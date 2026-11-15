@@ -1,0 +1,34 @@
+/media/DATA/repos-research/apart1/runs/microresearch/confirmatory_analysis.py:42: RuntimeWarning: Mean of empty slice
+  bootstrap=rng.choice(a,(20000,len(a)),replace=True).mean(1)
+/home/al/miniconda3/envs/apart1/lib/python3.12/site-packages/numpy/_core/_methods.py:134: RuntimeWarning: invalid value encountered in divide
+  ret = um.true_divide(
+/media/DATA/repos-research/apart1/runs/microresearch/confirmatory_analysis.py:43: SmallSampleWarning: One or more sample arguments is too small; all returned values will be NaN. See documentation for sample size requirements.
+  test=ttest_1samp(a,0,alternative='two-sided')
+/media/DATA/repos-research/apart1/runs/microresearch/confirmatory_analysis.py:47: RuntimeWarning: Mean of empty slice
+  'effect':float(a.mean()),'bootstrap_ci_95':interval,'paired_t_p_two_sided':float(test.pvalue),
+/home/al/miniconda3/envs/apart1/lib/python3.12/site-packages/numpy/_core/_methods.py:142: RuntimeWarning: invalid value encountered in scalar divide
+  ret = ret.dtype.type(ret / rcount)
+/media/DATA/repos-research/apart1/runs/microresearch/confirmatory_analysis.py:48: RuntimeWarning: Mean of empty slice
+  'primary_positive':bool(a.mean()>0 and test.pvalue<.05 and interval[0]>0),
+Traceback (most recent call last):
+  File "/media/DATA/repos-research/apart1/runs/microresearch/confirmatory_analysis.py", line 56, in <module>
+    if __name__=='__main__':analyse()
+                            ^^^^^^^^^
+  File "/media/DATA/repos-research/apart1/runs/microresearch/confirmatory_analysis.py", line 51, in analyse
+    write_json(directory/'confirmatory_analysis.json',result)
+  File "/media/DATA/repos-research/apart1/runs/microresearch/selftrap/storage.py", line 51, in write_json
+    stream.write(dumps(value)+"\n")
+                 ^^^^^^^^^^^^
+  File "/media/DATA/repos-research/apart1/runs/microresearch/selftrap/storage.py", line 20, in dumps
+    return json.dumps(value, ensure_ascii=False, sort_keys=True, allow_nan=False)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/al/miniconda3/envs/apart1/lib/python3.12/json/__init__.py", line 238, in dumps
+    **kw).encode(obj)
+          ^^^^^^^^^^^
+  File "/home/al/miniconda3/envs/apart1/lib/python3.12/json/encoder.py", line 200, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/al/miniconda3/envs/apart1/lib/python3.12/json/encoder.py", line 258, in iterencode
+    return _iterencode(o, 0)
+           ^^^^^^^^^^^^^^^^^
+ValueError: Out of range float values are not JSON compliant: nan

@@ -1,0 +1,42 @@
+RELATED-WORK CHECK DURING THE MICRO-STUDY, 15 NOVEMBER 2026
+
+The broad claims are already covered. A successful pilot must not be sold as
+the first demonstration that self-reports can be generic or overconfident.
+
+Strangers to Themselves (Blandfort & Pawar, September2026) directly compares
+self-specific behavioral predictions with generic-agent and other-model
+controls. Its reported self advantage is weak, and favorable self framing is
+an important bias. This is especially close to our original crossed forecast
+question; our null constructive D cannot be presented as overturning it.
+https://arxiv.org/abs/2609.09899
+
+Generalized Correctness Models (Xiao et al., ICML2026) finds little privileged
+self-correctness advantage and learns prediction from historical correctness,
+including in-context history and calibration. Our constant-rate holdout is a
+simple operational baseline in the same broad line, not a new calibration idea.
+https://arxiv.org/abs/2509.24988
+
+CRATER (Jiang et al., November4,2026) explicitly separates correct, incorrect
+and unfinished reasoning under token budgets, fitting distributions for
+configuration/budget routing and repeated sampling. Our three observed outcome
+types are necessary measurement practice, not an invented taxonomy.
+https://arxiv.org/abs/2611.05860
+
+Looking Inward (Binder et al., ICLR2025) studies trained self-prediction and
+reports advantages on some simple tasks but difficulties with more complex or
+out-of-distribution tasks. Our prompted API study has no self-prediction training
+and cannot settle questions about privileged internal access.
+https://arxiv.org/abs/2410.13787
+
+MathDuels already documents incorrect answers to self-generated valid problems.
+Our failed free-form Sokoban round adds a feasibility observation; workshop
+selection alone does not reproduce the claim of novel free-form authorship.
+https://arxiv.org/html/2604.21916v3#A3.SS3
+
+The secondary answer-visibility ablation targets a narrower information
+boundary: does a correct private solution change forecasts of an actor that
+never sees it? Related areas include biased reference-conditioned judges and
+knowledge leakage in role-play. We have not established that this ablation is
+globally novel; a positive result would be a specific empirical lead.
+https://arxiv.org/abs/2509.03419
+https://arxiv.org/abs/2610.17327

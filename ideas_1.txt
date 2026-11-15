@@ -1,0 +1,9 @@
+1. test adaptability / stability of models in solving tasks in increasingly complex worlds with constant domain shift. f.e. the Flappy Bird. we will test a) proficiency curve b) novelty or creativity in generating solution c) long horizon saturation
+
+2. task: resolve contradictions in puzzle (or fix puzzle) - with or without harness. We will evaluate on criteria: which condition/branch in reasoning tree to drop to fix it - eval preferences, etc
+
+2a. (extension of no.2) test the research abilities of AI - e.g. which claim to sacrifice to make the reasoning consistent, like in chess - ability to think long horizon and beat f.e. stockfish or similar systems
+
+3. test context memory saturation - how big the context must be to start hurting reasoning. Dimensions: self-organisation and decay (we will design the memory harness and explain the API and model decides - we will evaluate the decisions, based on math. optimality). We will also test the stucture - how models organizers its data which will give the lights on how models tend to structure its datasets and cache.
+
+4. test the patience of models (self inner thoughts) - f.e. how long it's running in circles before it gives up (without hints). Novelty - a new way to estimate task complexity or horizon complecity, etc
