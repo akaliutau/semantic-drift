@@ -1,1 +1,0 @@
-{"forecast_mean": {"gemma-4-31b-it|gemma-4-31b-it": 0.6749999999999999, "gemma-4-31b-it|qwen3.5-397b": 0.6931818181818182, "qwen3.5-397b|gemma-4-31b-it": 0.541590909090909, "qwen3.5-397b|qwen3.5-397b": 0.7652272727272728}, "source": "r4_discovery", "target_rate": {"gemma-4-31b-it": 0.5217391304347826, "qwen3.5-397b": 0.2391304347826087}}

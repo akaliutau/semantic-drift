@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "selftrap"
-version = "0.1.0"
-description = "Mechanically verified experiments in predictable model mistakes"
+version = "0.2.0"
+description = "Mechanically checked experiments in self-specific prediction and diagnosis"
 requires-python = ">=3.12"
-dependencies = ["jsonschema>=4.23", "tqdm>=4.66", "python-dotenv>=1.0", "adaption>=0.19,<0.20"]
+dependencies = ["tqdm>=4.66", "python-dotenv>=1.0", "adaption>=0.19,<0.20"]
 
 [project.optional-dependencies]
 test = ["pytest>=8"]

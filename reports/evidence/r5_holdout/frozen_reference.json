@@ -1,1 +1,0 @@
-{"at": "2026-11-15T07:52:47.618012+00:00", "counts": {"gemma-4-31b-it": {"n": 48, "safe": 26}, "qwen3.5-397b": {"n": 48, "safe": 12}}, "p_safe": {"gemma-4-31b-it": 0.54, "qwen3.5-397b": 0.26}, "smoothing": "Beta(1,1) posterior predictive", "source": "r4_discovery baseline, all 48 worlds", "source_actors_hash": "a35ee547ad7b82d5e6acfd57e13e92c5a3231350fc35e8c74ce26b15bb97d4c3"}

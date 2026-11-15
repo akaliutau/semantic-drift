@@ -1,0 +1,29 @@
+Closed directions (15 November 2026)
+
+1. Sokoban self-traps: free construction rarely produced valid witnesses.
+   Supplied certified choices made construction feasible, but no committed
+   exact forecasted bad-first-push event established self-specific insight.
+2. Binary puzzle choices and confidence: raw forecasts were overoptimistic;
+   historical rates helped. Self-vs-peer advantage vanished after bias controls.
+   Own diagnostic advice did not beat shuffled advice. Novelty was insufficient.
+3. Ordered-dot puzzles: 24-cell authored board was easy. Larger procedural and
+   assisted clue boards caused real certified dead ends in Qwen and Gemma.
+   Unchanged clues also defeated both; no redesign advantage was established.
+   One recovery did not become a repeatable recovery result. Dedicated DFS
+   solved four checked worlds in <2 ms. JSON/whitespace/truncation confounded
+   some apparent planning errors. Closed after six final-panel episodes;
+   two partial and two unrun assignments remain explicitly unscored.
+
+Retain: provider abstraction, streaming adapter, cross-process throttle and
+credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
+games, runners, elaborate plans and generated reports from the active tree.
+
+Recovery: main before cleanup a40b401; full later research branch ends 86f9b02.
+Original receipts remain in ignored runs/. The ORIGINAL shared 190-credit
+ledger is binding across all new searches. At closure: 24.308934 reported +
+10.838773 uncertain reserve = 35.147707 accounted credits. Never reset it.
+
+Novelty exclusions: generic puzzle duels (The Token Games, arXiv:2602.17831),
+verified task self-play (Absolute Zero, arXiv:2505.03335), generic self-prediction
+(Looking Inward, ICLR 2025), corrective-feedback puzzle planning
+(arXiv:2511.21591). New candidates must add a testable epistemic distinction.

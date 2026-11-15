@@ -1,6 +1,0 @@
-{
-  "description": "Handwritten development fixture, not research data. Two-push solution; outside the main 6-push minimum.",
-  "board": ["#######", "#_____#", "#_.$__#", "#_____#", "#_@$._#", "#_____#", "#######"],
-  "solution": [{"box": [2, 3], "direction": "left"}, {"box": [4, 3], "direction": "right"}],
-  "predicted_first_push": {"box": [2, 3], "direction": "up"}
-}
