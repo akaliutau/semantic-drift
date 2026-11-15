@@ -106,7 +106,7 @@ construction-only repair allowed. Use random.Random(seed) for variation.
         prompt=prompt.replace('6500 output tokens/120s',f'{ACTOR_TOKENS} output tokens/{ACTOR_SECONDS}s')
         error=None;r={}
         for attempt in range(2):
-            text=prompt if error is None else prompt+'\nDevelopment-seed validation error: '+error+'\nSubmit complete corrected source; retain the intended hypothesis.'
+            text=prompt if error is None else prompt+'\nPrevious submitted source:\n'+r.get('object',{}).get('code','')+'\nDevelopment-seed validation error: '+error+'\nSubmit complete corrected source; retain the intended hypothesis.'
             r=ask(folder,p,model,text,f'code-{attempt}',m,[CODE_TOOL],8000);r.update(model=model.id)
             if r['status']!='valid':break
             try:
@@ -145,6 +145,60 @@ def adopt_validated(name):
     write_json(path,authors);write_json(out/'adoption-seal.json',{'at':utc_now(),'audit':audit,'authors_hash':digest(authors),'before_new_cases':True,
         'reason':'Corrected pure-Python runtime compatibility (random.seed, ordinary collection methods, chr/ord). First valid unchanged submission per model, development seed only. No actor feedback used.',
         'programs_source':(ROOT/'selftrap/programs.py').read_text()})
+    return authors
+
+def repair_existing(name,p,m):
+    """A separate assisted construction phase; previous source is explicit."""
+    out=BASE/name;path=out/'repaired-authors.json';game=load_game(name)
+    if path.exists():return read_json(path)
+    def job(model):
+        previous=[]
+        for attempt in range(2):
+            file=out/'authors'/model.id/f'code-{attempt}.json'
+            if file.exists():
+                old=read_json(file)
+                if old.get('object',{}).get('code'):previous.append(old['object']['code'])
+        code=previous[-1] if previous else None;errors=[]
+        if code:
+            for seed in (0,1,2):
+                try:check_case(run_generator(code,seed,name)['value'],game)
+                except (ValueError,TypeError,KeyError,SyntaxError) as exc:errors.append({'seed':seed,'error':str(exc)})
+        prompt='''Repair your generator construction using the PREVIOUS SOURCE and concrete
+compiler errors below. Earlier repair requests omitted the source; this request
+supplies it. There are no actor outcomes for this game. Preserve your specific
+failure hypothesis where possible. If no source survived truncation, implement
+a fresh short generator. Return working code below 4000 characters, NO COMMENTS.
+Do not manually derive the hidden clues; inspect(puzzle) does that exactly.
+Actually call inspect from generate. Development seeds 0,1,2 must all be valid
+and yield distinct public puzzles. Future seeds are drawn after code freeze.
+Use random.Random(seed), basic loops/list/dict/string operations. No imports
+except random, no files, while, classes, private attributes or bitwise operators.
+At most eight inspect calls per seed, 3 CPU seconds, 256 MB. You may revise
+instance generation to make it valid, but you get no model-behavior feedback.
+
+generate(seed) returns puzzle, trap_answer, diagnosis, repair_advice, p_wrong,
+p_repair_correct, p_control_correct. All three probability arrays have two
+entries [Qwen,Gemma]. trap_answer is a legal answer unequal to inspector truth.
+diagnosis <=1200 characters; repair_advice <=700 characters. Actors see only
+the public puzzle, with 12000 tokens/180s and a submit_answer tool, no code
+execution. Submit only submit_generator(code=...).
+'''+dumps({'your_model':model.id,'rules':game.RULES,'construction_contract':game.AUTHOR,
+            'previous_source':code,'validation_errors':errors,'generic_advice':CONTROL})
+        folder=out/'assisted-construction'/model.id
+        r=ask(folder,p,model,prompt,'repair-with-source',m,[CODE_TOOL],5000);r.update(model=model.id)
+        if r['status']=='valid':
+            try:
+                code=r['object']['code'];development=[];seen=set()
+                for seed in (0,1,2):
+                    case=check_case(run_generator(code,seed,name)['value'],game);fingerprint=digest(case['analysis']['public'])
+                    if fingerprint in seen:raise ValueError('Repeated development puzzle')
+                    seen.add(fingerprint);development.append(case)
+                r.update(code=code,development_case=development[0],development_cases=development)
+            except (ValueError,TypeError,KeyError,SyntaxError) as exc:r.update(status='invalid_program',reason=str(exc))
+        write_json(folder/'result.json',r);return r
+    authors=parallel(MODELS,job,name+': source-aware construction')
+    write_json(path,authors);write_json(out/'repair-seal.json',{'at':utc_now(),'authors_hash':digest(authors),'before_new_cases':True,
+        'reason':'Separate assisted construction phase after discovering missing previous source in the original repair prompt. No behavioral observations for this game.'})
     return authors
 
 def make_cases(name,authors,phase):
@@ -247,12 +301,12 @@ def concurrency_report(m):
        'http_429':sum(c.get('status_code')==429 for c in calls),'new_requests':len(calls),'usage_after':usage()}
     write_json(BASE/'concurrency.json',r);return r
 
-def run(name,adopt=False):
+def run(name,adopt=False,repair=False):
     m=prepare();game=load_game(name);p=BudgetProvider(concurrency=3,per_model_concurrency=2);started=perf_counter()
     try:
-        phase='compatibility' if adopt else 'discovery'
+        phase='repaired' if repair else 'compatibility' if adopt else 'discovery'
         write_json(BASE/name/(phase+'-runner.json'),{'at':utc_now(),'source':Path(__file__).read_text(),'programs':(ROOT/'selftrap/programs.py').read_text()})
-        authors=adopt_validated(name) if adopt else invent(name,p,m);cases=make_cases(name,authors,phase)
+        authors=repair_existing(name,p,m) if repair else adopt_validated(name) if adopt else invent(name,p,m);cases=make_cases(name,authors,phase)
         valid=[c for c in cases if c['status']=='valid']
         fs=forecasts(name,cases,p,m,phase) if valid else []
         rows=actors(name,cases,p,m,phase,['baseline']) if valid else []
@@ -260,7 +314,7 @@ def run(name,adopt=False):
             'valid_cases':len(valid),'scored':sum(r['status']=='valid' for r in rows),'correct':sum(bool(r.get('correct')) for r in rows),
             'exact_predicted_errors':sum(bool(r.get('predicted_error')) for r in rows),'qualifying_generators':gate(cases,rows),
             'scores':prediction_scores(fs,rows),'seconds':perf_counter()-started,'rows':rows}
-        result.update(phase=phase,authors_file='adopted-authors.json' if adopt else 'authors.json')
+        result.update(phase=phase,authors_file='repaired-authors.json' if repair else 'adopted-authors.json' if adopt else 'authors.json')
         write_json(BASE/name/(phase+'-result.json'),result);write_json(BASE/name/'latest-result.json',result);print(dumps(result),flush=True)
     finally:p.close();print(dumps({'concurrency':concurrency_report(m)}),flush=True)
 
@@ -280,6 +334,6 @@ def confirm(name):
     finally:p.close();print(dumps({'concurrency':concurrency_report(m)}),flush=True)
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('game',choices=ORDER);parser.add_argument('--confirm',action='store_true');parser.add_argument('--adopt-validated',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('game',choices=ORDER);parser.add_argument('--confirm',action='store_true');parser.add_argument('--adopt-validated',action='store_true');parser.add_argument('--repair-existing',action='store_true');args=parser.parse_args()
     if args.confirm:confirm(args.game)
-    else:run(args.game,adopt=args.adopt_validated)
+    else:run(args.game,adopt=args.adopt_validated,repair=args.repair_existing)
