@@ -15,6 +15,8 @@ from .runtime import ROOT,BudgetProvider,MODELS,LEDGER,usage
 from .storage import digest,dumps,read_json,utc_now,write_json
 
 BASE=ROOT/'runs/new-search/ordered-games-1'
+ACTOR_TOKENS=12000
+ACTOR_SECONDS=180
 CONTROL='Check every supplied constraint, keep track of alternatives, and verify your answer before submitting. Use only the information actually given.'
 
 def parallel(jobs,fn,label):
@@ -101,6 +103,7 @@ Submit concise working code through submit_generator. Keep code below 5000
 characters. No source comments or embedded exploratory reasoning. One
 construction-only repair allowed. Use random.Random(seed) for variation.
 '''+dumps({'your_model':model.id,'models':[x.id for x in MODELS],'game':name,'rules':game.RULES,'generator_contract':game.AUTHOR,'generic_advice':CONTROL})
+        prompt=prompt.replace('6500 output tokens/120s',f'{ACTOR_TOKENS} output tokens/{ACTOR_SECONDS}s')
         error=None;r={}
         for attempt in range(2):
             text=prompt if error is None else prompt+'\nDevelopment-seed validation error: '+error+'\nSubmit complete corrected source; retain the intended hypothesis.'
@@ -176,6 +179,7 @@ control appends generic advice. No actor sees oracle answers or diagnoses.
 Actor contract: native submit_answer(answer=string), 6500 tokens/120s, no
 execution tools. Return one row per case-target through submit_forecasts.
 '''+dumps({'rules':game.RULES,'targets':[x.id for x in MODELS],'cases':evidence,'generic_advice':CONTROL})
+    prompt=prompt.replace('6500 tokens/120s',f'{ACTOR_TOKENS} tokens/{ACTOR_SECONDS}s')
     def job(model):
         r=ask(out/phase/'forecasters'/model.id,p,model,prompt,'forecast',m,[FORECAST_TOOL]);r['forecaster']=model.id
         if r['status']=='valid':
@@ -195,7 +199,7 @@ def actors(name,cases,p,m,phase,arms):
         case,model,arm=j;obj=case['case'];a=obj['analysis'];folder=out/phase/'actors'/case['id']/model.id/arm
         extra='' if arm=='baseline' else ('\nAdvice: '+(obj['repair_advice'] if arm=='repair' else CONTROL))
         prompt=game.RULES+'\n'+dumps(a['public'])+extra
-        r=ask(folder,p,model,prompt,'answer',m,[ANSWER_TOOL]);r.update(case=case['id'],author=case['author'],model=model.id,arm=arm)
+        r=ask(folder,p,model,prompt,'answer',{**m,'seconds':ACTOR_SECONDS},[ANSWER_TOOL],ACTOR_TOKENS);r.update(case=case['id'],author=case['author'],model=model.id,arm=arm)
         if r['status']=='valid':
             answer=r['object'].get('answer')
             if answer not in a['allowed_answers']:r.update(status='invalid_answer',answer=answer)
