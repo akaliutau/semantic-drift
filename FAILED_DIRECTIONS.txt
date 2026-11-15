@@ -37,6 +37,10 @@ Closed directions (15 November 2026)
    also omitted forced tool_choice. Separate fresh contract study required.
    Source bf33658; results runs/new-search/switch-selfprediction-1.
 
+9. Native harness self-modeling: 6 forecasts and 12 fresh actor cells. Forced
+   vs automatic tool choice yielded identical actions in every paired cell;
+   dropped. Source 4920ab6; results runs/new-search/harness-selfmodel-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
