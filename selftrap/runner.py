@@ -2,7 +2,7 @@
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from tqdm import tqdm
 from .journal import AdmissionJournal
-from .parsing import final_object
+from .parsing import submission
 from .providers import ProviderError
 from .runtime import usage,response_ok
 from .storage import read_json,write_json
@@ -22,8 +22,8 @@ def request(folder,provider,model,prompt,label,m,tools=None):
             tool_choice=m.get('tool_choice',{'type':'function','name':tools[0]['name']} if tools else 'none'))
         result={'status':r.raw.get('status'),'seconds':r.seconds,'tokens':(r.usage or {}).get('output_tokens')}
         if response_ok(r,model):
-            text=r.calls[0]['arguments'] if tools and len(r.calls)==1 else r.text
-            result.update(status='valid',object=final_object(text))
-    except (ProviderError,ValueError,KeyError) as exc:result={'status':'unavailable','reason':str(exc)}
+            obj,representation=submission(r,tools or [])
+            result.update(status='valid',object=obj,representation=representation)
+    except (ProviderError,ValueError,KeyError,SyntaxError,TypeError) as exc:result={'status':'unavailable','reason':str(exc)}
     write_json(folder/(label+'.json'),result);return result
 
