@@ -45,6 +45,11 @@ Closed directions (15 November 2026)
     Qwen-authored peer trap worked exactly, no self-targeted exact trap worked.
     Dropped; source 9aa6024, runs/new-search/string-selftraps-1.
 
+11. Unassisted new-family error laws: three valid laws, 12 held-out actor
+    calls; no self-authored law replicated at both n. Dropped. A posthoc
+    true-minus-one pattern in a peer-authored family needs a fresh test.
+    Source 4e58995; runs/new-search/executable-selfdiagnosis-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
