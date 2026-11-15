@@ -77,7 +77,9 @@ network, eval, classes, while loops, private attributes, bitwise operators.
 Use range/for/list comprehensions, basic numeric/list/dict/string operations.
 You may call inspect(puzzle) at most eight times per seed. It returns exact
 oracle analysis, never model behavior. 3 CPU seconds and 256 MB per seed.
-Development seed 0 only. Unknown future seeds follow after code is frozen.
+Development seeds 0,1,2 are checked for validity and distinct public puzzles.
+Unknown future seeds follow after code is frozen. Actually call inspect inside
+your program to check assumptions; it is available at generator execution.
 Use seed to vary puzzles meaningfully; constant puzzles do not count.
 
 Return {"puzzle": {...}, "trap_answer": "EXACT predicted wrong answer",
@@ -95,8 +97,9 @@ Actors get only game rules and the public puzzle, a native submit_answer tool,
 6500 output tokens/120s, no code execution. All author data, hidden world,
 forecasts and oracle answers are hidden from actors. Advice appears only in
 the stated intervention arms. Do not put instructions into puzzle fields.
-Submit concise working code through submit_generator. No source comments or
-embedded exploratory reasoning. One construction-only repair allowed.
+Submit concise working code through submit_generator. Keep code below 5000
+characters. No source comments or embedded exploratory reasoning. One
+construction-only repair allowed. Use random.Random(seed) for variation.
 '''+dumps({'your_model':model.id,'models':[x.id for x in MODELS],'game':name,'rules':game.RULES,'generator_contract':game.AUTHOR,'generic_advice':CONTROL})
         error=None;r={}
         for attempt in range(2):
@@ -104,8 +107,13 @@ embedded exploratory reasoning. One construction-only repair allowed.
             r=ask(folder,p,model,text,f'code-{attempt}',m,[CODE_TOOL],8000);r.update(model=model.id)
             if r['status']!='valid':break
             try:
-                code=r['object']['code'];case=check_case(run_generator(code,0,name)['value'],game)
-                r.update(code=code,development_case=case);error=None
+                code=r['object']['code'];development=[];seen=set()
+                for seed in (0,1,2):
+                    case=check_case(run_generator(code,seed,name)['value'],game)
+                    fingerprint=digest(case['analysis']['public'])
+                    if fingerprint in seen:raise ValueError(f'Development seed {seed}: public puzzle repeats an earlier seed')
+                    seen.add(fingerprint);development.append(case)
+                r.update(code=code,development_case=development[0],development_cases=development);error=None
             except (ValueError,TypeError,KeyError,SyntaxError) as exc:
                 error=str(exc);r.update(status='invalid_program',reason=error)
             write_json(folder/f'validation-{attempt}.json',{'at':utc_now(),'error':error})
