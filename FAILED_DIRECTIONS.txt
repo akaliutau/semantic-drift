@@ -22,6 +22,10 @@ Closed directions (15 November 2026)
    only one contained softlocks; gate required two. Dropped before audits.
    Interpreter remains reusable; results in runs/new-search/compiler-games-1.
 
+6. Exact traps in freely invented mechanics: 0/4 valid (two unreachable goals,
+   one declared trap was the immediate winning move, one truncation). Dropped.
+   Source 85ccada; raw results runs/new-search/targeted-rules-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
