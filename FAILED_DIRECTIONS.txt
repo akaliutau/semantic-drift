@@ -84,6 +84,15 @@ Closed directions (15 November 2026)
     All ordered-pilot receipts: runs/new-search/ordered-games-1.
     Full concise account: ORDERED_PILOT_REPORT.md. No winning claim or scale-up.
 
+17. Minimal one-key maze representation pilot: both Qwen 3.5 397B and Gemma
+    4 31B independently returned (room, has_key), sufficient and optimal on
+    all five small cases. Stopped after two cold calls; no feedback comparison
+    or scale-up. The supplied key bit made this representation selection,
+    not new-concept discovery. Certificate generation/checking works, but no
+    novel model blind spot or certificate benefit was established. Retain
+    the tiny simulator/checker as a demo. MAZE_PILOT_REPORT.txt;
+    runs/maze-abstraction-1. Incremental reported spend 0.02405092 credits.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.

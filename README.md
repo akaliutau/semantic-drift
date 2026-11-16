@@ -36,13 +36,18 @@ Prior implementations remain recoverable through Git history.
 
 Small maze representation pilot (isolated research branch):
 
+Result: both models passed without feedback; stopped after two requests.
+See [the short report](MAZE_PILOT_REPORT.txt) and
+[the three-room diagram](examples/maze-abstraction.png). The mechanical
+prototype works; this version is too easy to demonstrate the proposed benefit.
+
 ```bash
 python -m pip install -e '.[test,maze-demo]'
 python -m selftrap.maze_pilot --output runs/maze-abstraction-1
 python -m selftrap.maze_pilot --output runs/maze-abstraction-1 --live
 ```
 
-The first command prepares an offline three-room diagram and checked state
+Offline mode prepares a three-room diagram and checked state
 collision. Live mode tests two models without feedback first and stops if both
 already solve the representation task. Otherwise it compares generic feedback
 with the certificate, up to six requests and 0.5 additional credits. The exact

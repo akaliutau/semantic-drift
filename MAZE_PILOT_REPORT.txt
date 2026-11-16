@@ -1,0 +1,68 @@
+Minimal key-maze representation pilot — 16 November 2026
+
+Decision: the prototype works, but this testbed has a cold-start ceiling.
+Do not scale this version or claim a demonstrated epistemic blind spot.
+
+The game
+Three rooms: start A, key room B, exit C. A--B is open; A--C needs the
+reusable key collected automatically on entering B. The valid shortest
+route is A -> B -> A -> C. No traps, hidden physics, or extra mechanics.
+Diagram: examples/maze-abstraction.png.
+
+The algorithm
+Ordered search over small passage graphs and key/door placements found
+the example after two candidates. Room-only BFS incorrectly reports no
+route because returning to A is discarded as a visited node. The checked
+certificate contains two reachable states: A without a key and A with a
+key. Moving to C is legal in only the latter. Adding the inventory bit
+removes the collision and restores the shortest route.
+
+What was checked mechanically
+All four reachable states were enumerated. The certificate checker replays
+both histories and checks the claimed difference in legal moves. The same
+BFS is used before and after repair. Four prospectively fixed transfer
+cases cover renamed rooms, an extended branch, a bypass cycle, and an
+ordinary maze with no key. The cycle control can be solved using a flawed
+representation, confirming that a successful route alone does not certify
+representation sufficiency. Sufficiency is checked separately through
+goal labels and action-indexed successor classes on reachable states.
+
+Small live experiment
+The frozen design allowed at most six requests and 0.5 additional credits:
+two unassisted encoders first, followed by four paired repair calls only
+if the cold panel did not already pass. Both models passed, so the four
+generic-versus-certificate feedback calls were skipped as specified.
+
+Model                  Expression         Sufficient/optimal  API time  Output tokens
+Gemma 4 31B IT         (room, has_key)     5/5 and 5/5         1.23 s    58
+Qwen 3.5 397B          (room, has_key)     5/5 and 5/5        73.01 s  6796
+
+Each model made ONE submission reused across all five cases. This is two
+model trials, not ten independent observations. Temperature was zero;
+the exact served model IDs and complete native receipts are retained.
+Qwen's output included 6,752 reported reasoning tokens.
+
+Spending: 2 requests; 772 input tokens; 6,854 output tokens;
+0.02405092 reported credits; no new uncertain billing or in-flight calls.
+The original shared 190-credit cap was not changed or reset.
+
+Interpretation
+This validates a small, understandable counterexample generator and
+mechanical representation checker. It does not demonstrate an advantage
+over generic feedback, self-diagnosis, or discovery of a new concept.
+The prompt explicitly supplies room and has_key as observations, so the
+live task tests representation selection rather than predicate invention.
+Known abstraction-refinement ideas are not made novel by this feasibility
+check. The larger research hypothesis remains untested by a discriminating
+case. A future design should require discovering the missing state from
+events, without adding complicated game mechanics; that is not run here.
+
+Reproduce
+python -m pytest -q
+python -m selftrap.maze_pilot --output runs/maze-abstraction-1
+The offline command makes the diagram and checks; it performs no API calls.
+Adding --live is explicitly paid, bounded, and reuses completed receipts.
+Raw data and the pre-run design: runs/maze-abstraction-1/ (Git-ignored).
+Design SHA256: 02e986e5a5639d417d0b8be37c645c48a0be52e3371f0b90b2a71fc29e8dc133
+Local verification: 33 tests passed. The two pilot-harness tests use a fake
+provider only to check stopping/resume safety, never as research evidence.
