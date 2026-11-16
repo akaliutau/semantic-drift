@@ -88,3 +88,20 @@ compares routing, sliding, topology, programming and history-dependent games.
 Ordered dots with walls and mini Ricochet Robots are the recommended first
 testbeds. Existing puzzle benchmarks constrain the novelty claim; these games
 have not yet established a model abstraction failure in our experiments.
+
+Kaggle model-style pilot (isolated research branch): the token-backed download,
+prompt-disjoint CPU baselines and a four-call masking attempt are described in
+[the report](KAGGLE_STYLE_PILOT_REPORT.txt). Source attribution works above chance;
+the masked rewrites changed length and meaning, so they do not establish a
+style-only effect or an epistemic finding.
+
+```bash
+python -m pip install -e '.[test,style-lab]'
+python -m selftrap.style_lab --download --output runs/kaggle/new-baseline
+python -m selftrap.style_mask_pilot --baseline runs/kaggle/new-baseline --output runs/kaggle/new-masks
+```
+
+The final command prepares the fixed four-passage design offline; `--live`
+executes at most four requests under a 0.1-credit local guard and the original
+shared ceiling. Kaggle credentials are read from `.env` by its official SDK.
+Raw competition data, trained classifiers and request receipts stay in `runs/`.
