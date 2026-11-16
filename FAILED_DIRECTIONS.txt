@@ -126,6 +126,22 @@ Closed directions (15 November 2026)
     no new uncertain billing. Four confirmation cases remain untouched.
     PROVENANCE_TRUST_PILOT_REPORT.txt; runs/provenance-{trust,diagnostic}-1.
 
+22. Evidence independence versus wording diversity: two binary sensor worlds,
+    repeated/independent observations and matched eight-word report templates.
+    Both model families counted and acted correctly on all 16 calls; copied
+    evidence confidence shift from diverse wording was zero. This is not a
+    naturalistic eighteen-model-style or hidden-lineage test. Stop this version.
+    CONSENSUS_STYLE_AUDIT_REPORT.txt; runs/consensus-pilot-1.
+
+23. Executable word/typography counterfeits: two models produced working search
+    programs after explicit serialization/budget/interface repairs. The narrow
+    bank had no target-top1 solution on any of six transfer texts (exact bounds).
+    A larger reviewed bank also gave 0/6 flips for both programs and random/greedy
+    baselines at 64 queries each. No epistemic decision failure was established;
+    do not interpret an unreachable testbed as model inability. Code/harness work
+    but no winning novelty claim. EXECUTABLE_COUNTERFEIT_RESEARCH.txt;
+    runs/executable-mask-{1,repair-1}, runs/expanded-swap-audit-2.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.

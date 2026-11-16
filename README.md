@@ -118,3 +118,25 @@ python -m selftrap.provenance_diagnostic --output runs/new-provenance-diagnostic
 
 Both commands prepare sealed designs offline. `--live` runs the corresponding
 18-call screen or four-call diagnostic under the original shared budget.
+
+The [consensus and style-control pilots](CONSENSUS_STYLE_AUDIT_REPORT.txt) found
+no effect of equivalent wording on evidence counting in the controlled cases.
+Generic meaning checks did admit altered claims; an explicit commitment check
+reduced those errors. This is a validator result, not a replicated bias estimate.
+
+The [executable-counterfeit study](EXECUTABLE_COUNTERFEIT_RESEARCH.txt) implements
+no. 4 as an adversarial variant of provenance-based trust. Two models generated
+working swap/search programs. Neither achieved a targeted style-label flip on
+six transfer passages, so epistemic trust probes did not pass their entry gate.
+The report distinguishes initial interface failures, unreachable edit spaces,
+expanded contextual synonyms, simple search baselines and the remaining novelty
+requirements. All research remains isolated from the main branch.
+
+```bash
+python -m selftrap.consensus_pilot --output runs/new-consensus
+python -m selftrap.style_control_audit --output runs/new-style-control-audit
+python -m selftrap.executable_mask_pilot --output runs/new-executable-mask
+```
+
+These commands seal designs offline. `--live` admits the bounded API jobs.
+`expanded_swap_audit` evaluates frozen programs offline with a reviewed edit bank.
