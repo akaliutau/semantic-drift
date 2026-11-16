@@ -15,8 +15,9 @@ MODEL = ModelSpec("qwen3.8-27b", input_per_million=.039, output_per_million=1.25
 
 def retry(directory, game="numberlink", live=False):
     directory = Path(directory)
-    policy = {"model": asdict(MODEL), "selection": "First-priority model from the previous completion-only screen; no pruning correctness criterion.",
-              "reason": "The temperature-zero authoring produced reasoning-only incomplete output. Change only the supported temperature to the upstream thinking recommendation; retain identical task and datasets.",
+    policy = {"model": asdict(MODEL), "max_output_tokens": 32768,
+              "selection": "First-priority model from the previous completion-only screen; no pruning correctness criterion.",
+              "reason": "Both the temperature-zero screen and the temperature-one 10000-token call exhausted reasoning without a final answer. Retain temperature one, increase the output budget to 32768, and keep the task and datasets identical. Prior incomplete outputs remain unscored.",
               "source": "https://huggingface.co/Qwen/Qwen3.8-27B#best-practices",
               "unsupported_controls": "Adaption exposes no top_p/top_k controls here; do not claim the complete upstream decoding recipe.",
               "source_hash": digest(Path(__file__).read_text())}
