@@ -85,9 +85,18 @@ class Calls:
 def accounting(directory):
     responses=[read_json(p) for p in Path(directory).rglob('*.response.json')]
     requests=list(Path(directory).rglob('*.request.json'))
+    not_sent=0
+    unknown=0
+    for p in requests:
+        if p.with_name(p.name.replace('.request.json','.response.json')).exists():continue
+        error=p.with_name(p.name.replace('.request.json','.error.json'))
+        if error.exists() and read_json(error).get('billing')=='not_sent':not_sent+=1
+        else:unknown+=1
     return {'request_attempts':len(requests),'responses':len(responses),
+        'not_sent_requests':not_sent,
         'input_tokens':sum((r['usage'] or {}).get('input_tokens',0) for r in responses),
         'output_tokens':sum((r['usage'] or {}).get('output_tokens',0) for r in responses),
         'receipt_estimated_credits':sum(r['estimated_cost'] or 0 for r in responses),
+        'api_reported_cost':sum((r['usage'] or {}).get('cost',0) or 0 for r in responses),
         'api_seconds':sum(r['seconds'] for r in responses),
-        'unknown_outcome_requests':len(requests)-len(responses)}
+        'unknown_outcome_requests':unknown}
