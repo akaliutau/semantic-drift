@@ -32,6 +32,8 @@ def lattice(text):
     for match in pattern.finditer(text):
         old=match.group();low=old.lower()
         if low in GROUP:
+            if old!=low and low not in ('among','amongst','toward','towards','amid','amidst','afterward','afterwards'):
+                continue  # Do not respell a potential proper name such as Gray.
             options=list(GROUP[low])
             if old[:1].isupper():options=[s.capitalize() for s in options]
         elif old in ("'",'’'):options=["'",'’']
@@ -84,7 +86,7 @@ def raw(text):
  margin=float(v[target]-max(float(s) for i,s in enumerate(v) if i!=target))
  return margin,str(classes[int(v.argmax())])
 for task in req['tasks']:
- problem=task['problem'];budget=task['budget'];rng=random.Random(task['seed']);trace=[]
+ problem=task['problem'];budget=task['budget'];rng=random.Random(task['seed']);random.seed(task['seed']);trace=[]
  def score(plan):
   if len(trace)>=budget:raise ValueError('Classifier query cap exceeded')
   margin,label=raw(render(problem,plan));trace.append({'plan':list(plan),'margin':margin,'label':label})
