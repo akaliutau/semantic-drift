@@ -33,3 +33,20 @@ See the current [game-selection review](SEARCH.md),
 [failed directions](FAILED_DIRECTIONS.txt), the supplied
 [challenge](challenge_descr.txt), and [environment](env_description.txt).
 Prior implementations remain recoverable through Git history.
+
+Small maze representation pilot (isolated research branch):
+
+```bash
+python -m pip install -e '.[test,maze-demo]'
+python -m selftrap.maze_pilot --output runs/maze-abstraction-1
+python -m selftrap.maze_pilot --output runs/maze-abstraction-1 --live
+```
+
+The first command prepares an offline three-room diagram and checked state
+collision. Live mode tests two models without feedback first and stops if both
+already solve the representation task. Otherwise it compares generic feedback
+with the certificate, up to six requests and 0.5 additional credits. The exact
+worlds, prompts, source hashes, and stopping rule are sealed in `design.json`
+before API calls. Four transfer cases reuse each submitted representation;
+they are not independent model trials. Transitions are supplied correctly by
+the simulator, so this tests state abstraction rather than full formalization.
