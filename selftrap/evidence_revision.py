@@ -107,6 +107,23 @@ def reserve(model, messages, tools, tokens):
                 + tokens * model.output_per_million) / 1_000_000
 
 
+def native_call(response, expected=None, *, allow_wrapper=False):
+    expected = {} if expected is None else expected
+    if (len(response.calls) != 1 or response.calls[0].get("name") != "audit_panel"
+            or not response.calls[0].get("call_id")):
+        raise ValueError("Expected exactly one native audit_panel call")
+    call = response.calls[0]
+    arguments = strict_json(call.get("arguments") or "{}")
+    normalized = False
+    if allow_wrapper and isinstance(arguments, dict) and set(arguments) == {"parameters"}:
+        inner = arguments["parameters"]
+        arguments = strict_json(inner) if isinstance(inner, str) else inner
+        normalized = True
+    if arguments != expected:
+        raise ValueError("Unexpected audit_panel arguments")
+    return call, {"unwrapped_parameters": normalized, "resolved_arguments": arguments}
+
+
 class Calls:
     def __init__(self, directory, design, provider):
         self.directory, self.design, self.provider = directory, design, provider
@@ -117,7 +134,7 @@ class Calls:
         self.reserved = sum(reserve(rates[r["model"]["id"]], r["messages"], r["tools"], r["max_output_tokens"]) for r in prior)
 
     def ask(self, model, label, messages, *, tool_call=False, tools=None):
-        tools = [TOOL] if tool_call else tools or []
+        tools = (tools or [TOOL]) if tool_call else tools or []
         choice = {"type": "function", "name": "audit_panel"} if tool_call else "none"
         tokens = TOKENS[model.id]
         key = digest([messages, tools, choice, tokens])
@@ -132,7 +149,7 @@ class Calls:
         with self.lock:
             if not restoring:
                 extra = reserve(model, messages, tools, tokens)
-                if self.count >= MAX_CALLS or self.reserved + extra > CAP:
+                if self.count >= self.design["spec"].get("max_calls", MAX_CALLS) or self.reserved + extra > CAP:
                     raise RuntimeError("Bounded pilot cap reached")
                 self.count += 1
                 self.reserved += extra
@@ -145,11 +162,10 @@ class Calls:
             if not response_ok(response, model):
                 result["status"] = "incomplete_or_wrong_model"
             elif tool_call:
-                if (len(response.calls) != 1 or response.calls[0].get("name") != "audit_panel"
-                        or not response.calls[0].get("call_id")
-                        or strict_json(response.calls[0].get("arguments") or "{}") != {}):
-                    raise ValueError("Expected one native, parameterless audit_panel call")
-                result.update(status="completed", output=response.output, call=response.calls[0])
+                expected = self.design["spec"].get("expected_tool_arguments", {}).get(model.id, {})
+                call, normalization = native_call(response, expected,
+                    allow_wrapper=self.design["spec"].get("allow_argument_wrapper", False))
+                result.update(status="completed", output=response.output, call=call, normalization=normalization)
             else:
                 obj, encoding = submission(response, [])
                 result.update(status="completed", object=obj, encoding=encoding, output=response.output)

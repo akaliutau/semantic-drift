@@ -1,7 +1,10 @@
 import copy
 import json
 
+import pytest
+
 from selftrap import evidence_revision as study
+from selftrap import evidence_continue as followup
 from selftrap.providers import ModelResponse
 from selftrap.runtime import RESPONSE_IDS
 from selftrap.storage import dumps, read_json
@@ -20,7 +23,7 @@ def fixtures(panel, *, reject_valid=False, acknowledge=False):
     return {"rows": rows}
 
 
-def fake_provider(monkeypatch, *, reject_baseline=True, persist=True):
+def fake_provider(monkeypatch, *, reject_baseline=True, persist=True, broken_tools=False):
     calls = []
 
     class Provider:
@@ -30,10 +33,17 @@ def fake_provider(monkeypatch, *, reject_baseline=True, persist=True):
         def complete(self, model, messages, **kwargs):
             calls.append((model.id, messages, kwargs))
             tool_call = isinstance(kwargs["tool_choice"], dict)
+            status = "completed"
             if tool_call:
-                assert messages[-1]["content"] == study.AUDIT_REQUEST
+                assert "audit_panel" in messages[-1]["content"]
+                required = kwargs["tools"][0]["parameters"]["required"]
+                arguments = {"scope": "all"} if required else {}
+                if broken_tools and model.id == "qwen3.5-397b" and not required:
+                    arguments = {"parameters": "{}"}
                 output = [{"type": "function_call", "call_id": "real-fixture-call-" + model.id,
-                           "name": "audit_panel", "arguments": "{}"}]
+                           "name": "audit_panel", "arguments": dumps(arguments)}]
+                if broken_tools and model.id == "gemma-4-31b-it" and not required:
+                    status, output = "incomplete", []
                 text = ""
             else:
                 evidence = [m for m in messages if m.get("type") == "function_call_output"]
@@ -48,7 +58,7 @@ def fake_provider(monkeypatch, *, reject_baseline=True, persist=True):
                 text = dumps(obj)
                 output = [{"type": "message", "role": "assistant",
                            "content": [{"type": "output_text", "text": text}]}]
-            return ModelResponse(text, output, {"status": "completed", "model": RESPONSE_IDS[model.id]},
+            return ModelResponse(text, output, {"status": status, "model": RESPONSE_IDS[model.id]},
                                  .01, {"input_tokens": 10, "output_tokens": 10, "cost": .0001}, .0001, "credits")
 
         def close(self):
@@ -110,3 +120,33 @@ def test_no_cold_rejections_stops_after_two_calls(tmp_path, monkeypatch):
     study.run(tmp_path, live=True)
     assert read_json(tmp_path / "result.json")["decision"] == "REJECT_NO_STABLE_BASELINE"
     assert len(calls) == 2
+
+
+def test_only_lossless_tool_argument_wrappers_are_accepted():
+    response = ModelResponse("", [{"type": "function_call", "call_id": "fixture", "name": "audit_panel",
+        "arguments": '{"parameters":"{}"}'}], {}, 0, None, None, "credits")
+    with pytest.raises(ValueError):
+        study.native_call(response)
+    call, normalization = study.native_call(response, allow_wrapper=True)
+    assert normalization == {"unwrapped_parameters": True, "resolved_arguments": {}}
+    response.output[0]["arguments"] = '{"parameters":{"scope":"partial"}}'
+    with pytest.raises(ValueError):
+        study.native_call(response, {"scope": "all"}, allow_wrapper=True)
+
+
+def test_compatibility_phase_reuses_all_finished_trials_and_actual_native_call(tmp_path, monkeypatch):
+    calls = fake_provider(monkeypatch, broken_tools=True)
+    original = tmp_path / "original"
+    study.run(original, live=True)
+    assert read_json(original / "result.json")["decision"] == "INCONCLUSIVE_TECHNICAL"
+    assert len(calls) == 6
+    monkeypatch.setattr(followup, "BudgetProvider", study.BudgetProvider)
+    monkeypatch.setattr(followup, "usage", study.usage)
+    continued = tmp_path / "continued"
+    followup.run(continued, original, live=True)
+    result = read_json(continued / "result.json")
+    assert result["decision"] == "ACCEPT_PILOT_PROMISE"
+    assert result["new_phase_calls"] == 3
+    assert result["calls"] == len(calls) == 9
+    followup.run(continued, original, live=True)
+    assert len(calls) == 9
