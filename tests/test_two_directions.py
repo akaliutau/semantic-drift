@@ -136,3 +136,26 @@ def test_incomplete_target_is_unscored_and_completed_target_continues(tmp_path, 
     assert len(calls) == 3
     assert result["unscored_targets"] == ["qwen3.5-397b"]
     assert [r["model"] for r in result["self_clones"]] == ["gemma-4-31b-it"]
+
+
+def test_dotted_model_names_keep_construction_repair_receipts_distinct(tmp_path, monkeypatch):
+    calls = []
+
+    class Provider:
+        def complete(self, model, messages, **kwargs):
+            calls.append(messages)
+            return ModelResponse('{"ok":true}', [], {"status": "completed", "model": RESPONSE_IDS[model.id]},
+                                 .01, {"cost": .0001}, .0001, "credits")
+
+    snapshot = {"reported_credits": 0, "uncertain_reserve": 0}
+    monkeypatch.setattr(study, "usage", lambda: snapshot)
+    requests = study.Requests(tmp_path, {"budget_before": snapshot,
+        "spec": {"tokens": 12000, "seconds": 180}}, Provider())
+    model = study.MODELS_PINNED[0]
+    label = "self-clone-for-" + model.id
+    first = requests.ask(model, label, "Original author prompt")
+    repair = requests.ask(model, label + "-construction-repair", "Different repair prompt")
+    assert first["status"] == repair["status"] == "completed"
+    assert len(list((tmp_path / "receipts").rglob("*.request.json"))) == 2
+    requests.ask(model, label + "-construction-repair", "Different repair prompt")
+    assert len(calls) == 2

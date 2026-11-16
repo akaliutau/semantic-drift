@@ -144,7 +144,10 @@ class Requests:
                 return row
         tokens, seconds = self.design["spec"]["tokens"], self.design["spec"]["seconds"]
         receipts = self.directory / "receipts" / model.id
-        restoring = (receipts / f"{label}-admission0-0.request.json").exists()
+        # Journal uses Path.with_suffix; a dot in a model-derived label would
+        # otherwise truncate both the label and a construction-repair suffix.
+        receipt_label = label.replace(".", "_")
+        restoring = (receipts / f"{receipt_label}-admission0-0.request.json").exists()
         with self.lock:
             if not restoring:
                 spent = charged(usage()) - charged(self.design["budget_before"])
@@ -154,7 +157,7 @@ class Requests:
                 self.new_admissions += 1
         row = {"model": model.id, "label": label, "prompt_hash": digest(prompt)}
         try:
-            response = AdmissionJournal(receipts).complete(label, self.provider, model,
+            response = AdmissionJournal(receipts).complete(receipt_label, self.provider, model,
                 [{"role": "user", "content": prompt}], tools=[], max_output_tokens=tokens,
                 timeout=seconds, retries=0)
             row.update(api_status=response.raw.get("status"), served_model=response.raw.get("model"),
