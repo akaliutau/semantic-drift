@@ -94,3 +94,45 @@ def test_no_traps_stop_at_four_requests_and_resume_never_replays(tmp_path, monke
     assert len(result["self_clones"]) == 2
     study.run(tmp_path, live=True)
     assert len(calls) == 4
+    followup = tmp_path / "followup"
+    study.run(followup, live=True, tokens=24000, seconds=300, reuse_discovery=tmp_path)
+    assert len(calls) == 6  # Two new authors, no repeated actors.
+    result = read_json(followup / "result.json")
+    assert result["new_requests"] == 2
+    assert all(r.get("reused_from") for r in result["discovery"])
+
+
+def test_incomplete_target_is_unscored_and_completed_target_continues(tmp_path, monkeypatch):
+    calls = []
+
+    class PartialProvider:
+        def __init__(self, **kwargs):
+            pass
+
+        def complete(self, model, messages, **kwargs):
+            prompt = messages[0]["content"]
+            calls.append((model.id, prompt))
+            status = "completed"
+            if model.id == "qwen3.5-397b":
+                status, obj = "incomplete", None
+            elif prompt.startswith(study.ACTOR):
+                panel = json.loads(prompt.split("Programs:\n", 1)[1])
+                obj = {"rows": [{"id": p["id"], "verdict": "VALID" if certify(p["steps"])["valid"] else "INVALID",
+                                 "counterexample": None} for p in panel]}
+            else:
+                obj = {"code": EXACT_CLONE, "hypothesis": "Synthetic exact-checker fixture."}
+            return ModelResponse(json.dumps(obj), [], {"status": status, "model": RESPONSE_IDS[model.id]},
+                                 .01, {"cost": .0001}, .0001, "credits")
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr(study, "BudgetProvider", PartialProvider)
+    monkeypatch.setattr(study, "render", lambda *args: None)
+    monkeypatch.setattr(study, "usage", lambda: {"calls": len(calls), "reported_credits": len(calls) * .0001,
+        "uncertain_reserve": 0, "input_tokens": 0, "output_tokens": 0, "in_flight": 0, "hard_ceiling": 190})
+    study.run(tmp_path, live=True)
+    result = read_json(tmp_path / "result.json")
+    assert len(calls) == 3
+    assert result["unscored_targets"] == ["qwen3.5-397b"]
+    assert [r["model"] for r in result["self_clones"]] == ["gemma-4-31b-it"]

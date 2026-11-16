@@ -68,16 +68,18 @@ def charged(budget):
     return budget["reported_credits"] + budget["uncertain_reserve"]
 
 
-def prepare(directory):
+def prepare(directory, *, tokens=TOKENS, seconds=SECONDS, reuse_discovery=None):
+    if not 1 <= tokens <= 24000 or not 0 < seconds <= 300:
+        raise ValueError("Pilot limits: at most 24000 output tokens and 300 seconds")
     discovery = discovery_panel()
     hidden = pool(101, 12, 12, exclude=[r["public"]["id"] for r in discovery["cases"]])
     spec = {
-        "protocol": "truth-and-selfclone-v1", "models": [asdict(m) for m in MODELS_PINNED],
+        "protocol": "truth-and-selfclone-v2", "models": [asdict(m) for m in MODELS_PINNED],
         "max_calls": MAX_CALLS, "incremental_credit_cap": CREDIT_CAP,
-        "tokens": TOKENS, "seconds": SECONDS, "rules": RULES,
+        "tokens": tokens, "seconds": seconds, "rules": RULES,
         "actor_prompt": ACTOR, "author_prompt": AUTHOR,
         "discovery": discovery, "held_out": hidden,
-        "stops": ["API/submission failure is not a reasoning error; stop dependent work.",
+        "stops": ["API/submission failure is not a reasoning error; stop dependent work for that target. Completed targets continue independently.",
                   "No cold false rejection: stop direction 2 discovery; no larger adaptive search.",
                   "No eligible self-surrogate predicts an error in the sealed pool: stop self-surrogate search.",
                   "If candidates exist, obtain peer surrogates and at most one fresh confirmation panel per target.",
@@ -87,6 +89,22 @@ def prepare(directory):
                           ("sortnet.py", "two_directions.py", "programs.py", "runtime.py", "streaming.py")},
         "limits": "Four verdicts in one request are correlated; this is a feasibility screen. The proof certificate is retained for researchers but is shown to the target only in selected confirmation cases. Initial false rejection measures verification error, not irrational refusal of visible proof.",
     }
+    if reuse_discovery is not None:
+        previous = Path(reuse_discovery)
+        original = read_json(previous / "design.json")["spec"]
+        for key in ("models", "actor_prompt", "rules", "discovery"):
+            if original[key] != spec[key]:
+                raise ValueError(f"Discovery reuse changes {key}")
+        reused = []
+        for model in MODELS_PINNED:
+            saved = previous / "responses" / model.id / "discovery.json"
+            if not saved.exists():
+                continue
+            response = read_json(saved)
+            if response["status"] == "completed":
+                reused.append({"model": model.id, "path": str(saved.resolve()),
+                               "hash": digest(response)})
+        spec["reused_discovery"] = reused
     path = directory / "design.json"
     if path.exists():
         design = read_json(path)
@@ -114,22 +132,31 @@ class Requests:
         result_path = self.directory / "responses" / model.id / f"{label}.json"
         if result_path.exists():
             return read_json(result_path)
+        if label == "discovery":
+            for reference in self.design["spec"].get("reused_discovery", []):
+                if reference["model"] != model.id:
+                    continue
+                row = read_json(reference["path"])
+                if digest(row) != reference["hash"] or row["prompt_hash"] != digest(prompt):
+                    raise ValueError("Reused discovery receipt or prompt changed")
+                row = {**row, "reused_from": reference["path"]}
+                write_json(result_path, row)
+                return row
+        tokens, seconds = self.design["spec"]["tokens"], self.design["spec"]["seconds"]
         receipts = self.directory / "receipts" / model.id
         restoring = (receipts / f"{label}-admission0-0.request.json").exists()
         with self.lock:
             if not restoring:
                 spent = charged(usage()) - charged(self.design["budget_before"])
-                # The maximum price reserve of every admitted request is also
-                # bounded by 10 * (<12000 output tokens at the pinned rates).
-                reserve = (len(prompt.encode()) * model.input_per_million + TOKENS * model.output_per_million) / 1_000_000
+                reserve = (len(prompt.encode()) * model.input_per_million + tokens * model.output_per_million) / 1_000_000
                 if self.existing + self.new_admissions >= MAX_CALLS or spent + reserve > CREDIT_CAP:
                     raise RuntimeError("Small-pilot guard reached")
                 self.new_admissions += 1
         row = {"model": model.id, "label": label, "prompt_hash": digest(prompt)}
         try:
             response = AdmissionJournal(receipts).complete(label, self.provider, model,
-                [{"role": "user", "content": prompt}], tools=[], max_output_tokens=TOKENS,
-                timeout=SECONDS, retries=0)
+                [{"role": "user", "content": prompt}], tools=[], max_output_tokens=tokens,
+                timeout=seconds, retries=0)
             row.update(api_status=response.raw.get("status"), served_model=response.raw.get("model"),
                        seconds=response.seconds, usage=response.usage, response_id=response.raw.get("id"))
             if response_ok(response, model):
@@ -246,16 +273,16 @@ def finish(directory, design, data, stop):
     return result
 
 
-def run(directory, live=False):
+def run(directory, live=False, *, tokens=TOKENS, seconds=SECONDS, reuse_discovery=None):
     directory = Path(directory)
-    design = prepare(directory)
+    if live and (directory / "result.json").exists():
+        result = read_json(directory / "result.json")
+        print(dumps({"cached": True, "stop": result["stop"], "new_requests": result["new_requests"]}))
+        return
+    design = prepare(directory, tokens=tokens, seconds=seconds, reuse_discovery=reuse_discovery)
     if not live:
         print(dumps({"mode": "offline", "directory": str(directory), "max_calls": MAX_CALLS,
                      "max_additional_credits": CREDIT_CAP, "discovery_cases": 4, "held_out_candidates": 24}))
-        return
-    if (directory / "result.json").exists():
-        result = read_json(directory / "result.json")
-        print(dumps({"cached": True, "stop": result["stop"], "new_requests": result["new_requests"]}))
         return
     if design["budget_before"] is None:
         if list((directory / "receipts").rglob("*.request.json")):
@@ -272,28 +299,32 @@ def run(directory, live=False):
         actors = parallel(MODELS_PINNED, lambda m: actor(requests, m, discovery, "discovery"), "Review four tiny programs")
         data["discovery"] = actors
         write_json(directory / "discovery.json", actors)
-        if any(r["status"] != "completed" for r in actors):
+        active = tuple(m for m in MODELS_PINNED
+                       if any(r["model"] == m.id and r["status"] == "completed" for r in actors))
+        data["unscored_targets"] = [r["model"] for r in actors if r["status"] != "completed"]
+        if not active:
             return finish(directory, design, data, "incomplete_discovery")
-        observations = {r["model"]: r["scored"] for r in actors}
-        self_clones = parallel(MODELS_PINNED,
+        observations = {r["model"]: r["scored"] for r in actors if r["status"] == "completed"}
+        self_clones = parallel(active,
             lambda m: author(requests, m, m, observations[m.id], discovery, "self"), "Export self-surrogates")
         data["self_clones"] = self_clones
         write_json(directory / "self-clones.json", self_clones)
         selected = {r["target"]: candidate(r, hidden) for r in self_clones if r.get("target")}
-        false_rejects = {r["model"]: [s["id"] for s in r["scored"] if s["false_rejection"]] for r in actors}
+        false_rejects = {r["model"]: [s["id"] for s in r["scored"] if s["false_rejection"]]
+                        for r in actors if r["status"] == "completed"}
         data["direction2_discovery_false_rejections"] = false_rejects
         data["self_selected_ids"] = {k: None if v is None else v["public"]["id"] for k, v in selected.items()}
         if not any(selected.values()) and not any(false_rejects.values()):
             return finish(directory, design, data, "no_false_rejections_or_self_predicted_traps")
         peers = []
         if any(selected.values()):
-            jobs = [(MODELS_PINNED[1-i], target) for i, target in enumerate(MODELS_PINNED)]
+            jobs = [(next(m for m in MODELS_PINNED if m.id != target.id), target) for target in active]
             peers = parallel(jobs, lambda j: author(requests, j[0], j[1], observations[j[1].id], discovery, "peer"), "Matched peer-surrogates")
         data["peer_clones"] = peers
         write_json(directory / "peer-clones.json", peers)
         panels = {}
         forecasts = {}
-        for target in MODELS_PINNED:
+        for target in active:
             choices = {}
             labels = {}
             for clone in [*self_clones, *peers]:
@@ -316,7 +347,7 @@ def run(directory, live=False):
                                 for clone in [*self_clones, *peers] if clone.get("target") == target.id and clone.get("eligible")}}
         write_json(directory / "confirmation-seal.json", {"at": utc_now(), "before_target_calls": True,
                                                         "panels": panels, "frozen_forecasts": forecasts})
-        confirmation = parallel([m for m in MODELS_PINNED if m.id in panels],
+        confirmation = parallel([m for m in active if m.id in panels],
             lambda m: actor(requests, m, panels[m.id], "confirmation"), "Confirm selected cases")
         data.update(confirmation=confirmation, frozen_forecasts=forecasts)
         return finish(directory, design, data, "bounded_confirmation_complete")
@@ -328,5 +359,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="runs/truth-and-selfclone-1")
     parser.add_argument("--live", action="store_true")
+    parser.add_argument("--tokens", type=int, default=TOKENS)
+    parser.add_argument("--seconds", type=float, default=SECONDS)
+    parser.add_argument("--reuse-discovery", type=Path,
+                        help="Fresh phase: reuse completed, identical discovery prompts only")
     args = parser.parse_args()
-    run(args.output, args.live)
+    run(args.output, args.live, tokens=args.tokens, seconds=args.seconds,
+        reuse_discovery=args.reuse_discovery)
