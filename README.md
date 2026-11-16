@@ -1,4 +1,4 @@
-# Semantic Gate Audit
+# Semantic Audit
 
 **Can rewording make an LLM approve a factual change that it rejects when shown plainly?**
 
@@ -13,9 +13,6 @@ cheap repairs. Style-attack research uses semantic checks
 ([Epistemic Erosion](https://aclanthology.org/2026.aacl-long.223/)). Our question
 is whether broader rewording conceals an otherwise detectable commitment change.
 
-Exploratory evidence: Gemma approved **5/6** altered rewrites; GLM **1/6**.
-These cover only four topics. [Pilot evidence](examples/pilot.json) is exploratory,
-not confirmation or evidence against a published bias estimate.
 
 ## Run
 
@@ -39,8 +36,7 @@ Six workers, two calls/model, request/token throttling, shared 429 backoff, and
 **three total attempts maximum**. Only transient API failures retry; model
 answers, malformed outputs, and incomplete generations do not. Default runtime
 is **110 minutes**, with an analysis reserve; **120 minutes is the maximum**.
-Partial outcomes are saved at the deadline. Keep the same local `cache/` to
-preserve the cumulative spending limit.
+Partial outcomes are saved at the deadline. 
 
 ## Design
 
@@ -53,7 +49,7 @@ Holm correction across all judges/primary contrasts, topic bootstrap intervals,
 and missing-outcome bounds are generated automatically. A confirmation label
 requires N≥20, ≥95% complete pairs, and passing controls. Models stay separate.
 
-## Results you can analyse without another API call
+## How to reproduce results in paper
 
 The output folder contains frozen cases/config, **source-code snapshot + SHA256**,
 full prompts/raw responses, failures/retries, `observations.csv`, `summary.json`,
@@ -64,8 +60,7 @@ python -m pipeline analyze results/study-40
 ```
 
 `share/` is a committable audit subset. The full local cache is Git-ignored;
-three generation receipts are bundled in `examples/cache/`. A completed
-[end-to-end smoke example](examples/smoke_result/) is also included.
+three generation receipts are bundled in `examples/cache/`. 
 
 The dataset has single-assistant reference annotation. Verbatim-retention guards
 are not complete semantic proofs. Additional content changes can contribute to
