@@ -30,6 +30,14 @@ class FakeProvider:
     def close(self):pass
 
 
+class MalformedAuthor(FakeProvider):
+    def complete(self,model,messages,*,tools,**kwargs):
+        response=super().complete(model,messages,tools=tools,**kwargs)
+        if tools[0]['name']=='submit_rewrite':
+            response.output[0]['arguments']='{"text":null}'
+        return response
+
+
 def test_full_pipeline_can_be_reanalysed_without_api_and_preserves_sources(tmp_path):
     c=load_config('config.json');c['judges']=c['judges'][:2]
     c['author']={**c['author'],'id':'fixture-author'}
@@ -45,3 +53,16 @@ def test_full_pipeline_can_be_reanalysed_without_api_and_preserves_sources(tmp_p
     m=read_json(out/'manifest.json');assert len(m['source']['sha256'])==64
     assert (out/'observations.csv').exists() and (out/'share/cases.jsonl').exists()
     assert (out/'source/pipeline/study.py').exists()
+
+
+def test_bad_generation_saves_an_analysable_partial_result_without_retry(tmp_path):
+    c=load_config('config.json');c['judges']=c['judges'][:2]
+    c['author']={**c['author'],'id':'fixture-author'}
+    c.update(workers=3,requests_per_minute=60000,tokens_per_minute=10000000,
+             max_minutes=5,analysis_reserve_seconds=1)
+    provider=MalformedAuthor();out=tmp_path/'partial'
+    s=run(out,tmp_path/'cache',c,load_cases('data/cases.jsonl',1,c['seed']),'data/cases.jsonl',provider)
+    assert provider.calls==3 and s['construction_valid']==0
+    assert read_json(out/'manifest.json')['status']=='complete_with_missing'
+    assert all(v['rewritten']['missing']==1 and v['bare']['completed']==1 for v in s['counts'].values())
+    assert (out/'summary.json').exists() and (out/'observations.csv').exists()

@@ -56,11 +56,19 @@ def plan(cases,config,cache):
         if p.exists() and read_json(p)['status']=='completed':cached+=1
     judge_calls=len(cases)*len(CONDITIONS)*len(config['judges'])
     new_calls=len(cases)-cached+judge_calls
-    nominal=new_calls/config['requests_per_minute']
+    rate=config['requests_per_minute'];measured=None
+    timing=Path(cache)/'performance.json'
+    if timing.exists():
+        p=read_json(timing)
+        if p['signature']==performance_signature(config):
+            measured=p['observed_calls_per_minute'];rate=min(rate,measured)
+    nominal=new_calls/rate
     planning=nominal*1.25+config['analysis_reserve_seconds']/60
     return {'topics':len(cases),'judges':len(config['judges']),'cached_rewrites':cached,
             'maximum_judge_calls':judge_calls,'calls_before_retries':new_calls,
-            'rate_floor_minutes':nominal,'planning_minutes':planning,
+            'rate_floor_minutes':new_calls/config['requests_per_minute'],
+            'estimated_execution_minutes':nominal,'planning_minutes':planning,
+            'measured_calls_per_minute':measured,
             'max_minutes':config['max_minutes'],
             'note':'25% planning margin; retries and slow providers may exceed it. Actual deadline wins. '
                    'Existing judge caches can reduce calls. N counts source topics, not individual decisions.'}
@@ -91,7 +99,7 @@ def run(output,cache,config,cases,dataset,provider=None):
     if manifest_path.exists():
         manifest=read_json(manifest_path)
         if manifest['signature']!=signature:raise ValueError('Run inputs or source changed; choose a new output folder')
-        if manifest['status']=='complete':return analyse(output)
+        if manifest['status'] in ('complete','complete_with_missing'):return analyse(output)
     else:
         manifest={'protocol':'semantic-gate-audit-v1','run_id':uuid4().hex,'signature':signature,
                   'started_at':utc_now(),'status':'running','source':source_snapshot(output),
@@ -116,18 +124,20 @@ def run(output,cache,config,cases,dataset,provider=None):
             if path.exists():return read_json(path)
             record=runner.ask(config['author'],author_prompt(case),AUTHOR_TOOL)
             ok,reason=construction_check(case,record.get('object')) if record['status']=='completed' else (False,record.get('error',record['status']))
+            obj=record.get('object')
             row={'case_id':case['id'],'cluster':case['cluster'],'request_sha256':record['request_sha256'],
-                 'eligible':ok,'reason':reason,'rewrite':record.get('object',{}).get('text')}
+                 'eligible':ok,'reason':reason,'rewrite':obj.get('text') if isinstance(obj,dict) else None}
             write_json(path,row);return row
         built=_batch(cases,generate,config['workers'],'1/2 Construct rewrites',runner.stop)
         by_id={b['case_id']:b for b in built};jobs=[]
         for case in cases:
             for condition in CONDITIONS:
-                rows=candidates(case,by_id[case['id']]['rewrite'],condition,config['seed'])
+                blocked=condition!='bare' and not by_id[case['id']]['eligible']
+                rows=[] if blocked else candidates(case,by_id[case['id']]['rewrite'],condition,config['seed'])
                 for model in config['judges']:
                     jobs.append({'case_id':case['id'],'cluster':case['cluster'],'family':case['family'],
                                  'model':model['id'],'condition':condition,'candidates':rows,
-                                 'prompt':judge_prompt(case,rows,condition),
+                                 'prompt':None if blocked else judge_prompt(case,rows,condition),
                                  'construction_valid':by_id[case['id']]['eligible']})
         random.Random(config['seed']+1).shuffle(jobs)
         job_hash=digest(jobs);frozen=output/'jobs.json'
@@ -148,8 +158,9 @@ def run(output,cache,config,cases,dataset,provider=None):
                     try:row['judgments']=score(job['candidates'],record['object'])
                     except ValueError as exc:row.update(status='invalid_judgment',error=str(exc))
             write_json(path,row);return row
-        _batch(jobs,judge,config['workers'],'2/2 Judge paired conditions',runner.stop)
-        manifest.update(status='complete',finished_at=utc_now())
+        outcomes=_batch(jobs,judge,config['workers'],'2/2 Judge paired conditions',runner.stop)
+        status='complete' if all('judgments' in r for r in outcomes) else 'complete_with_missing'
+        manifest.update(status=status,finished_at=utc_now())
     except KeyboardInterrupt:
         runner.stop.set();manifest.update(status='interrupted',finished_at=utc_now())
     except BaseException:
@@ -157,7 +168,23 @@ def run(output,cache,config,cases,dataset,provider=None):
     finally:
         runner.close();write_json(manifest_path,manifest)
         analyse(output)
+        calibrate(output,cache)
     return read_json(output/'summary.json') if (output/'summary.json').exists() else manifest
+
+
+def performance_signature(config):
+    return digest({k:config[k] for k in ('judges','author','workers','per_model_concurrency',
+                                        'requests_per_minute','tokens_per_minute','temperature')})
+
+
+def calibrate(output,cache):
+    manifest=read_json(Path(output)/'manifest.json');s=read_json(Path(output)/'summary.json')
+    attempts=s['metrics']['api_attempts'];seconds=s['metrics']['wall_seconds']
+    if attempts>=5 and seconds>0:
+        write_json(Path(cache)/'performance.json',{'signature':performance_signature(manifest['config']),
+            'observed_calls_per_minute':60*attempts/seconds,'calls':attempts,
+            'source_run_id':manifest['run_id'],
+            'note':'Observed throughput from the previous run; planning only, not a runtime guarantee.'})
 
 
 def analyse(output):
