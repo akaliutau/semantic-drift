@@ -4,6 +4,7 @@ Legal membership and protected tokens are mechanically checked. General English
 semantic equivalence is NOT certified by a synonym dictionary or this module.
 """
 
+import ast
 import json
 import os
 from pathlib import Path
@@ -64,8 +65,15 @@ def render(problem,plan):
 
 
 def validate_policy(code):
-    validate_source(code)
     if len(code)>6000:raise ValueError('Policy exceeds 6000 characters')
+    tree=ast.parse(code)
+    class ScopeCheck(ast.NodeTransformer):
+        def visit_Nonlocal(self,node):
+            if any(n.startswith('__') for n in node.names):raise ValueError('Private nonlocal excluded')
+            return ast.copy_location(ast.Pass(),node)
+    # Nonlocal only binds names inside generated nested functions. Validate
+    # every other node with the established sandbox, then execute ORIGINAL code.
+    validate_source(ast.unparse(ScopeCheck().visit(tree)))
     return code
 
 

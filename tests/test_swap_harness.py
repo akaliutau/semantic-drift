@@ -20,3 +20,9 @@ def test_policy_cannot_import_os_or_access_classifier_internals():
                  'def generate(x): return score.__globals__',
                  'def generate(x): return x.__class__'):
         with pytest.raises(ValueError):validate_policy(code)
+
+
+def test_nested_counter_scope_is_allowed_without_adding_private_access():
+    code='def generate(x):\n n=0\n def count():\n  nonlocal n\n  n+=1\n count()\n return []'
+    assert validate_policy(code)==code
+    with pytest.raises(ValueError):validate_policy('def generate(x):\n def f():\n  nonlocal __builtins__\n return []')

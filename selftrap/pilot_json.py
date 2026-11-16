@@ -76,8 +76,8 @@ class Calls:
 
 
 def accounting(directory):
-    responses=[read_json(p) for p in (Path(directory)/'receipts').rglob('*.response.json')]
-    requests=list((Path(directory)/'receipts').rglob('*.request.json'))
+    responses=[read_json(p) for p in Path(directory).rglob('*.response.json')]
+    requests=list(Path(directory).rglob('*.request.json'))
     return {'request_attempts':len(requests),'responses':len(responses),
         'input_tokens':sum((r['usage'] or {}).get('input_tokens',0) for r in responses),
         'output_tokens':sum((r['usage'] or {}).get('output_tokens',0) for r in responses),
