@@ -41,9 +41,12 @@ class Calls:
         self.count=len(list((self.directory/'receipts').rglob('*.request.json')))
         self.lock=threading.Lock();self.provider=provider or BudgetProvider(concurrency=2)
 
-    def ask(self,model,label,prompt,*,tokens=None):
+    def ask(self,model,label,prompt,*,tokens=None,tools=None):
         tokens=tokens or TOKENS[model.id]
-        identity=digest({'model':asdict(model),'prompt':prompt,'tokens':tokens})
+        tools=tools or []
+        identity_fields={'model':asdict(model),'prompt':prompt,'tokens':tokens}
+        if tools:identity_fields['tools']=tools
+        identity=digest(identity_fields)
         path=self.directory/'responses'/model.id/(label+'.json')
         if path.exists():
             row=read_json(path)
@@ -63,11 +66,12 @@ class Calls:
         started=perf_counter()
         try:
             r=AdmissionJournal(receipts).complete(label,self.provider,model,
-                [{'role':'user','content':prompt}],tools=[],tool_choice='none',
+                [{'role':'user','content':prompt}],tools=tools,
+                tool_choice={'type':'function','name':tools[0]['name']} if tools else 'none',
                 max_output_tokens=tokens,timeout=120,retries=0)
             row.update(api_status=r.raw.get('status'),served_model=r.raw.get('model'),seconds=r.seconds,usage=r.usage)
             if not response_ok(r,model):raise ValueError('Incomplete response or wrong model')
-            obj,encoding=submission(r,[])
+            obj,encoding=submission(r,tools)
             row.update(status='completed',object=obj,encoding=encoding)
         except Exception as exc:
             row.update(status='unavailable',error=f'{type(exc).__name__}: {exc}')

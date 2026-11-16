@@ -24,6 +24,12 @@ from .storage import digest, dumps, read_json, utc_now, write_json
 
 
 MODES = ('standard', 'checklist', 'diff')
+DECISION = {'type':'object','properties':{'admissible':{'type':'boolean'},'reason':{'type':'string'}},
+            'required':['admissible','reason'],'additionalProperties':False}
+TOOLS = [{'type':'function','name':'submit_judgments',
+          'description':'Submit one final semantic-preservation decision for each candidate.',
+          'parameters':{'type':'object','properties':{k:DECISION for k in ('A','B','C')},
+                        'required':['A','B','C'],'additionalProperties':False}}]
 PILOT = (
     ('4a974f4a365c', 'approximately', 'exactly'),
     ('07f409f75b21', 'may', 'will'),
@@ -83,13 +89,21 @@ def prompt(item, mode):
                    '"reason":"at most 35 words"}]}. Include exactly one judgment per candidate.')
 
 
-def prepare(directory, data):
+def prepare(directory, data, structured=False):
     rows = {r['id']:r for r in csv.DictReader(Path(data).open())}
     rng = random.Random(2026111604)
     items = [build_item(rows[key], old, new, rng) for key,old,new in PILOT]
     if len({r['cluster'] for r in items}) != len(items):
         raise ValueError('Pilot must have one sample per source-prompt cluster')
-    spec = dict(protocol='natural-style-validity-pilot-v1', phase='exploratory',
+    prompts={i['id']:{m:prompt(i,m) for m in MODES} for i in items}
+    if structured:
+        for modes in prompts.values():
+            for mode,text in list(modes.items()):
+                modes[mode]=text[:text.rfind('\nReturn only JSON:')]+(
+                    '\nSubmit your final decisions using submit_judgments. Provide exactly one '
+                    'admissible boolean and a reason of at most 35 words for each of A, B, and C.')
+    spec = dict(protocol='natural-style-validity-pilot-v2' if structured else 'natural-style-validity-pilot-v1',
+                phase='exploratory', structured=structured, tools=TOOLS if structured else [],
                 source_hash=digest(Path(__file__).read_text()),
                 scoring_hash=digest(Path(__file__).with_name('gate_audit.py').read_text()),
                 data_hash=digest(Path(data).read_text()), models=[asdict(m) for m in MODELS],
@@ -98,7 +112,7 @@ def prepare(directory, data):
                      'Not a mechanical semantic proof of arbitrary natural passages.',
                 provenance='Yao Yan, Martyna Plomecka, Ashley Oldacre. Name That LLM, Kaggle 2026, CC BY-SA 4.0. '
                            'Synthetic edited texts are derivatives; no original prompts or factual truth labels.',
-                prompts={i['id']:{m:prompt(i,m) for m in MODES} for i in items},
+                prompts=prompts,
                 gate='Both models approve at least two altered passages in standard mode, '
                      'accept at least 6/7 positive controls, reject all obvious negative controls; '
                      'no persistent technical failure. Confirmation must use new source clusters.')
@@ -114,10 +128,16 @@ def execute(directory, design):
     results=[];started=perf_counter()
     def work(item,model,mode):
         r=calls.ask(model,item['id']+'-'+mode,spec['prompts'][item['id']][mode],
-                    tokens=8192 if model.id.startswith('glm') else 3000)
+                    tokens=8192 if model.id.startswith('glm') else 3000,tools=spec.get('tools',[]))
         out={**r,'model':model.id,'case_id':item['id'],'cluster':item['cluster'],'mode':mode}
         if r['status']=='completed':
-            try:out['judgments']=evaluate(item,r['object'])
+            try:
+                obj=r['object']
+                if spec.get('structured'):
+                    if not isinstance(obj,dict) or set(obj)!={'A','B','C'}:
+                        raise ValueError('Expected fixed decision slots A, B, C')
+                    obj={'judgments':[dict(id=k,**obj[k]) for k in ('A','B','C')]}
+                out['judgments']=evaluate(item,obj)
             except ValueError as exc:out.update(status='schema_error',error=str(exc))
         return out
     try:
@@ -149,7 +169,8 @@ if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--output',type=Path,default=Path('runs/natural-gate-pilot-1'))
     p.add_argument('--data',type=Path,default=Path('runs/kaggle/name-that-llm/raw/train.csv'))
+    p.add_argument('--structured',action='store_true')
     p.add_argument('--live',action='store_true');a=p.parse_args()
-    design=prepare(a.output,a.data)
+    design=prepare(a.output,a.data,a.structured)
     if a.live:execute(a.output,design)
     else:print(f'Sealed {design["spec"]["max_calls"]} calls: {a.output/"design.json"}')
