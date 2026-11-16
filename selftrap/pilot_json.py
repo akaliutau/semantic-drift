@@ -7,6 +7,7 @@ sealed; incomplete responses are technical outcomes, never reasoning scores.
 from dataclasses import asdict
 from pathlib import Path
 import threading
+from time import perf_counter
 
 from .journal import AdmissionJournal
 from .parsing import submission
@@ -34,11 +35,11 @@ def seal(directory, spec):
 
 
 class Calls:
-    def __init__(self,directory,design,*,max_calls,credit_cap=1.0):
+    def __init__(self,directory,design,*,max_calls,credit_cap=1.0,provider=None):
         self.directory=Path(directory);self.design=design
         self.max_calls=max_calls;self.credit_cap=credit_cap
         self.count=len(list((self.directory/'receipts').rglob('*.request.json')))
-        self.lock=threading.Lock();self.provider=BudgetProvider(concurrency=2)
+        self.lock=threading.Lock();self.provider=provider or BudgetProvider(concurrency=2)
 
     def ask(self,model,label,prompt,*,tokens=None):
         tokens=tokens or TOKENS[model.id]
@@ -58,7 +59,8 @@ class Calls:
                 if self.count>=self.max_calls or spent+reserve>self.credit_cap:
                     raise RuntimeError('Small-pilot request or credit cap reached')
                 self.count+=1
-        row={'request_identity':identity,'model':model.id,'label':label}
+        row={'request_identity':identity,'model':model.id,'label':label,'started_at':utc_now()}
+        started=perf_counter()
         try:
             r=AdmissionJournal(receipts).complete(label,self.provider,model,
                 [{'role':'user','content':prompt}],tools=[],tool_choice='none',
@@ -69,6 +71,7 @@ class Calls:
             row.update(status='completed',object=obj,encoding=encoding)
         except Exception as exc:
             row.update(status='unavailable',error=f'{type(exc).__name__}: {exc}')
+        row.update(wall_seconds=perf_counter()-started,finished_at=utc_now())
         write_json(path,row)
         return row
 
