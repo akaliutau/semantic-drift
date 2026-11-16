@@ -14,7 +14,8 @@ LEDGER=ROOT/'runs/microresearch/runs/study/budget.json'
 
 MODELS=(ModelSpec('qwen3.5-397b',input_per_million=.55,output_per_million=3.5),
         ModelSpec('gemma-4-31b-it',input_per_million=.09,output_per_million=.34))
-RESPONSE_IDS={'qwen3.5-397b':'qwen3.5-397b-a17b-nvfp4','gemma-4-31b-it':'gemma-4-31b-it'}
+RESPONSE_IDS={'qwen3.5-397b':'qwen3.5-397b-a17b-nvfp4','gemma-4-31b-it':'gemma-4-31b-it',
+              'glm-5.2':'glm-5.2'}
 
 
 def usage(path=LEDGER):

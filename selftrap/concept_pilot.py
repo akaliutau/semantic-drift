@@ -20,13 +20,16 @@ from .maze_pilot import parallel
 from .parsing import submission
 from .planning_lab import Arena, RULES, make_world, records, render, verify
 from .programs import run_generator, validate_source
+from .providers import ModelSpec
 from .runtime import BudgetProvider, usage, response_ok
 from .storage import digest, dumps, read_json, utc_now, write_json
 from .two_directions import MODELS_PINNED
 
 
 GAMES = ("dots", "ricochet", "numberlink")
-TOKENS = {"gemma-4-31b-it": 10000, "qwen3.5-397b": 24000}
+TOKENS = {"gemma-4-31b-it": 10000, "qwen3.5-397b": 24000, "glm-5.2": 24000}
+GLM_PAIR = (MODELS_PINNED[1], ModelSpec("glm-5.2", input_per_million=1.4,
+                                    output_per_million=4.4, settings={"temperature": 0}))
 TASK = """Invent a CHEAP, reusable state-pruning lemma for the supplied game.
 An exact graph-search planner already exists. It checks goals first, generates
 legal successors correctly and decrements moves_left on every action. We want
@@ -88,12 +91,12 @@ def score(code, rows):
             "kept": sum(predictions), "count": len(rows), "seconds": perf_counter()-started}
 
 
-def prepare(directory):
+def prepare(directory, models=MODELS_PINNED, reuse_from=None):
     settings = [("train", 11, 4, 4), ("train", 17, 4, 4),
                 ("discovery", 41, 4, 4), ("discovery", 43, 4, 4),
                 ("confirmation", 101, 4, 5), ("confirmation", 107, 4, 5),
                 ("repair_transfer", 211, 5, 4), ("repair_transfer", 223, 5, 4)]
-    spec = {"protocol": "three-game-pruner-cold-v1", "models": [asdict(m) for m in MODELS_PINNED],
+    spec = {"protocol": "three-game-pruner-cold-v1", "models": [asdict(m) for m in models],
             "games": GAMES, "seeds": settings, "rules": RULES, "task": TASK,
             "tokens": TOKENS, "seconds": 300, "max_calls": 12, "incremental_credit_cap": 2.0,
             "budget_before": None, "source_hashes": {n: digest((Path(__file__).parent / n).read_text()) for n in
@@ -101,6 +104,18 @@ def prepare(directory):
             "stops": "Six cold authors, at most one construction-only repair each. No resampling a valid program after an unsafe result. Always-keep and correct simple bounds are valid baselines, not new concepts.",
             "promise_gate": "A cold error alone never passes. A subsequent prospectively sealed stage must test self-specific error predictions against a peer with identical evidence, pinpoint the omitted distinction mechanically, and compare useful repairs on untouched boards. No claim of novel predicate invention, universal safety, or statistical significance from this screen.",
             "limits": "A pruner is a Boolean abstraction of bounded completion, not a complete solver or an exact bisimulation. Record panels sample reachable states; absence of a counterexample is not a proof of soundness."}
+    if reuse_from is not None:
+        references = []
+        for game in GAMES:
+            for model in models:
+                for label in ("cold", "construction-repair"):
+                    previous = Path(reuse_from) / "responses" / game / model.id / f"{label}.json"
+                    if previous.exists():
+                        response = read_json(previous)
+                        if response["status"] == "completed":
+                            references.append({"game": game, "model": model.id, "label": label,
+                                               "path": str(previous.resolve()), "hash": digest(response)})
+        spec["reused_authorings"] = references
     path = directory / "design.json"
     if path.exists():
         design = read_json(path)
@@ -144,6 +159,15 @@ class Calls:
             row = read_json(path)
             if row["prompt_hash"] != digest(prompt):
                 raise ValueError("Cached prompt changed")
+            return row
+        for reference in self.design.get("spec", {}).get("reused_authorings", []):
+            if (reference["game"], reference["model"], reference["label"]) != (game, model.id, label):
+                continue
+            row = read_json(reference["path"])
+            if digest(row) != reference["hash"] or row["prompt_hash"] != digest(prompt):
+                raise ValueError("Reused author response or prompt differs")
+            row = {**row, "reused_from": reference["path"]}
+            write_json(path, row)
             return row
         receipts = self.directory / "receipts" / game / model.id
         restoring = (receipts / f"{label}-admission0-0.request.json").exists()
@@ -197,9 +221,9 @@ def author(calls, model, game, design):
     raise AssertionError("Unreachable")
 
 
-def run(directory, game=None, live=False):
+def run(directory, game=None, live=False, *, models=MODELS_PINNED, reuse_from=None):
     directory = Path(directory)
-    design = prepare(directory)
+    design = prepare(directory, models, reuse_from)
     if not live:
         print(dumps({"mode": "offline", "games": GAMES, "max_calls": 12, "credit_cap": 2}))
         return
@@ -215,7 +239,7 @@ def run(directory, game=None, live=False):
             result_path = directory / f"{selected}-cold.json"
             if result_path.exists():
                 continue
-            authors = parallel(MODELS_PINNED, lambda m: author(calls, m, selected, design), f"Invent {selected} pruning rules")
+            authors = parallel(models, lambda m: author(calls, m, selected, design), f"Invent {selected} pruning rules")
             for row in authors:
                 if not row.get("construction_valid"):
                     continue
@@ -242,5 +266,8 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, default=Path("runs/three-game-concepts-1"))
     parser.add_argument("--game", choices=GAMES)
     parser.add_argument("--live", action="store_true")
+    parser.add_argument("--pair", choices=("qwen", "glm"), default="qwen")
+    parser.add_argument("--reuse-from", type=Path)
     args = parser.parse_args()
-    run(args.output, args.game, args.live)
+    run(args.output, args.game, args.live, models=GLM_PAIR if args.pair == "glm" else MODELS_PINNED,
+        reuse_from=args.reuse_from)

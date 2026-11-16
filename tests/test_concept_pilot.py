@@ -4,7 +4,7 @@ from selftrap import concept_pilot as study
 from selftrap.planning_lab import Arena, World, make_world, records, verify
 from selftrap.providers import ModelResponse
 from selftrap.runtime import RESPONSE_IDS
-from selftrap.storage import dumps, read_json
+from selftrap.storage import digest, dumps, read_json, write_json
 
 
 KEEP_ALL = 'def generate(batch):\n return [True for obs in batch]'
@@ -73,7 +73,7 @@ def test_six_cold_authors_and_resume_are_bounded_without_paid_calls(tmp_path, mo
             pass
 
     monkeypatch.setattr(study, "BudgetProvider", Provider)
-    monkeypatch.setattr(study, "prepare", lambda directory: design)
+    monkeypatch.setattr(study, "prepare", lambda *args: design)
     monkeypatch.setattr(study, "usage", lambda: {"calls": len(calls), "reported_credits": len(calls)*.0001,
         "uncertain_reserve": 0, "input_tokens": 0, "output_tokens": 0, "in_flight": 0, "hard_ceiling": 190})
     study.run(tmp_path, live=True)
@@ -84,3 +84,18 @@ def test_six_cold_authors_and_resume_are_bounded_without_paid_calls(tmp_path, mo
         assert all(a["construction_valid"] and a["discovery"][0]["unsafe"] == 0 for a in r["authors"])
     study.run(tmp_path, live=True)
     assert len(calls) == 6
+
+
+def test_completed_authoring_reuse_requires_identical_prompt_and_receipt(tmp_path):
+    previous = tmp_path / "prior.json"
+    row = {"status": "completed", "prompt_hash": digest("same"), "object": {"code": KEEP_ALL}}
+    write_json(previous, row)
+    design = {"spec": {"reused_authorings": [{"game": "dots", "model": study.MODELS_PINNED[1].id,
+               "label": "cold", "path": str(previous), "hash": digest(row)}]}}
+    calls = study.Calls(tmp_path / "new", design, None)
+    model = study.MODELS_PINNED[1]
+    result = calls.ask(model, "dots", "cold", "same")
+    assert result["reused_from"] == str(previous)
+    assert calls.count == 0
+    with pytest.raises(ValueError):
+        calls.ask(model, "dots", "cold", "changed")
