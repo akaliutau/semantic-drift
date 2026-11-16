@@ -284,7 +284,7 @@ def records(arena, count=32):
     states.sort(key=lambda s: (len(arena.history(s)), s))
     if len(states) > 128:
         states = [states[i * (len(states)-1) // 127] for i in range(128)]
-    candidates = [(s, budget) for s in states for budget in (1, 2, 3, 5, 8, 16)]
+    candidates = [(s, budget) for s in states for budget in (1, 2, 3, 5, 8, 16, 32)]
     selected = []
     for winning in (True, False):
         options = [(s,b) for s,b in candidates if (s in arena.distance and arena.distance[s] <= b) == winning]
