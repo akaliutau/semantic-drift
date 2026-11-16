@@ -93,6 +93,20 @@ Closed directions (15 November 2026)
     the tiny simulator/checker as a demo. MAZE_PILOT_REPORT.txt;
     runs/maze-abstraction-1. Incremental reported spend 0.02405092 credits.
 
+18. Certified truths rejected (four-slot sorting programs): Gemma rejected
+    a correct standard sorter, again with an exhaustive certificate, and a
+    nearby equivalent variant. Both models accepted the unusual correct
+    backward-comparison program. Real verification errors, but no established
+    novel bias against unfamiliar truths; no model-guided evolution scaled.
+    TRUTH_SELFCLONE_PILOT_REPORT.txt; runs/truth-and-selfclone-{1,2,3}.
+
+19. Executable self-surrogates: both self programs ran and selected new traps.
+    Gemma's trap worked, but its matched peer made the identical prediction.
+    Qwen solved its self-selected trap and failed the peer-selected one.
+    No self-specific advantage was observed; no scale-up. Ten total admissions
+    for directions 18/19 including interruption and token exhaustion:
+    0.16772380 reported + 0.09014680 new uncertain credits. No winning claim.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.

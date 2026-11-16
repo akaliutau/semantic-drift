@@ -55,3 +55,24 @@ worlds, prompts, source hashes, and stopping rule are sealed in `design.json`
 before API calls. Four transfer cases reuse each submitted representation;
 they are not independent model trials. Transitions are supplied correctly by
 the simulator, so this tests state abstraction rather than full formalization.
+
+Two further small pilots use four-slot comparison programs: search for correct
+solutions a model rejects, and model-written programs predicting its own
+mistakes. Gemma rejected a correct sorter even with a true exhaustive
+certificate. Its peer predicted the same failure; Qwen's peer found a trap
+that Qwen's self-selected candidate did not. No self-specific advantage or
+winning novelty was established. See [the report](TRUTH_SELFCLONE_PILOT_REPORT.txt)
+and [the program diagram](examples/sorting-program.png).
+
+```bash
+python -m selftrap.two_directions --output runs/new-sortnet-pilot
+```
+
+This prepares checked examples offline. `--live` admits at most ten new
+requests and one additional credit under the original shared ledger.
+The protocol freezes four discovery cases, 24 offline candidates and the
+stopping gates. Only candidates selected before target feedback are confirmed.
+Completed targets can continue when another fails to submit. An explicit new
+phase can set `--tokens 24000 --seconds 300 --reuse-discovery PATH`; it reuses
+only completed responses to identical discovery prompts. The pilot stopped
+after ten total admissions, including one interrupted and one incomplete call.
