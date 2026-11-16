@@ -3,16 +3,11 @@
 **Can rewording make an LLM approve a factual change that it rejects when shown plainly?**
 
 Example: “This code **may** extend beyond physical space” becomes “This code
-**will** extend beyond physical space.” The stronger claim remains verbatim
-while a model rewrites the surrounding report. A meaning-preservation judge
-then decides whether this qualifies as a style-only rewrite.
+**will** extend beyond physical space.” A meaning-preservation judge
+must decide whether this qualifies as a style-only rewrite.
 
 The contribution is a paired audit of the **validation gate itself**, including
-cheap repairs. Style-attack research uses semantic checks
-([BITE](https://arxiv.org/abs/2605.26156)); uncertainty loss is already known
-([Epistemic Erosion](https://aclanthology.org/2026.aacl-long.223/)). Our question
-is whether broader rewording conceals an otherwise detectable commitment change.
-
+cheap repairs. 
 
 ## Run
 
