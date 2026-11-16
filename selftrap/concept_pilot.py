@@ -27,7 +27,8 @@ from .two_directions import MODELS_PINNED
 
 
 GAMES = ("dots", "ricochet", "numberlink")
-TOKENS = {"gemma-4-31b-it": 10000, "qwen3.5-397b": 24000, "glm-5.2": 24000}
+TOKENS = {"gemma-4-31b-it": 10000, "qwen3.5-397b": 24000, "glm-5.2": 24000,
+          "qwen3.8-27b": 10000, "deepseek-v4-flash": 10000, "glm-5.3-flash": 10000}
 GLM_PAIR = (MODELS_PINNED[1], ModelSpec("glm-5.2", input_per_million=1.4,
                                     output_per_million=4.4, settings={"temperature": 0}))
 TASK = """Invent a CHEAP, reusable state-pruning lemma for the supplied game.
