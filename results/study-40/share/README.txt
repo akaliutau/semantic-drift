@@ -1,0 +1,1 @@
+Audit subset: first 3 frozen source topics. full_run_summary.json describes the WHOLE run, not this subset. The full results folder is required to recompute its statistics. Original prose: Name That LLM, Yao Yan, Martyna Plomecka, Ashley Oldacre, Kaggle 2026, CC BY-SA 4.0. No credentials are stored here.
