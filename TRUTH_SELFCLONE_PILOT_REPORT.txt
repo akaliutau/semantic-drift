@@ -36,8 +36,9 @@ with a backward comparison pictured in examples/sorting-program.png.
 Thus the observed rejection is not evidence of a specific bias against novel
 or unfamiliar correct solutions. A supplied true certificate did not correct
 this particular rejection; no causal benefit/harm of certificates is estimated.
-Also, one of Qwen's two initial INVALID verdicts had an invalid witness:
-4/4 verdict accuracy does not mean four fully valid justifications.
+Correction after a receipt audit: BOTH of Qwen's initial INVALID verdicts
+had valid witnesses. The previous version of this report incorrectly said
+one was invalid. Its initial four verdicts and both supplied witnesses pass.
 
 3. Export your blind spots as executable code
 Each target and its peer received the SAME four target observations, programs
