@@ -117,6 +117,15 @@ Closed directions (15 November 2026)
     Nine calls total, 0.05001168 credits, no new uncertain billing. Do not scale.
     EVIDENCE_REVISION_REPORT.txt; runs/evidence-revision-{1,2}.
 
+21. Correct provenance, wrong trust: two copy-only workflows x four metadata
+    conditions x two model families. All 16 copying decisions were correct,
+    with exactly zero confidence change from editor identity/authentication.
+    Both genuine-check controls selected correctly. Gemma's small instrument
+    confidence discrepancy disappeared in a four-call disambiguated diagnostic.
+    STOP_NO_CROSS_MODEL_DECISION_PROMISE. 22 calls, 0.00820026 reported credits,
+    no new uncertain billing. Four confirmation cases remain untouched.
+    PROVENANCE_TRUST_PILOT_REPORT.txt; runs/provenance-{trust,diagnostic}-1.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.

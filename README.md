@@ -105,3 +105,16 @@ The final command prepares the fixed four-passage design offline; `--live`
 executes at most four requests under a 0.1-credit local guard and the original
 shared ceiling. Kaggle credentials are read from `.env` by its official SDK.
 Raw competition data, trained classifiers and request receipts stay in `runs/`.
+
+The [provenance trust pilot](PROVENANCE_TRUST_PILOT_REPORT.txt) found no decision
+failure in two model families: editor identity and authentication left copied
+claim confidence unchanged. All 22 checking choices, including controls and a
+separate diagnostic, were correct. The predeclared gate stopped larger runs.
+
+```bash
+python -m selftrap.provenance_pilot --output runs/new-provenance
+python -m selftrap.provenance_diagnostic --output runs/new-provenance-diagnostic
+```
+
+Both commands prepare sealed designs offline. `--live` runs the corresponding
+18-call screen or four-call diagnostic under the original shared budget.
