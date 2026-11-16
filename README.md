@@ -76,3 +76,15 @@ Completed targets can continue when another fails to submit. An explicit new
 phase can set `--tokens 24000 --seconds 300 --reuse-discovery PATH`; it reuses
 only completed responses to identical discovery prompts. The pilot stopped
 after ten total admissions, including one interrupted and one incomplete call.
+
+The decisive [evidence-revision follow-up](EVIDENCE_REVISION_REPORT.txt) rejected
+the stronger persistence claim: Gemma corrected both false rejections after
+native execution evidence; ordinary rechecking did not. Qwen stayed correct.
+Nine calls including a declared tool-interface repair cost 0.05001168 credits.
+Offline preparation: `python -m selftrap.evidence_revision --output runs/new-evidence`.
+
+For the missing-abstraction direction, the [game review](CONCEPT_GAME_REVIEW.txt)
+compares routing, sliding, topology, programming and history-dependent games.
+Ordered dots with walls and mini Ricochet Robots are the recommended first
+testbeds. Existing puzzle benchmarks constrain the novelty claim; these games
+have not yet established a model abstraction failure in our experiments.

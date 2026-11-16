@@ -1,0 +1,124 @@
+Direction 1: game selection for discovering missing abstractions — 16 Nov 2026
+
+Recommendation: ordered dots with walls, followed by mini Ricochet Robots.
+For a more algebraic concept-invention study, consider peg solitaire.
+This is a review of suitable families, not an exhaustive catalogue of every
+board game. The suitability judgments below are research-design inferences.
+No new game has been tested on a model in this review.
+
+The measured problem
+Can a model discover that its own compact representation conflates situations
+with different possible futures, identify the omitted distinction, and repair
+the representation on new boards? The maze pilot supplied has_key explicitly;
+it tested feature selection and reached a ceiling. A new game should support
+discovering a structural property, such as a separating region or a useful
+temporary blocker. Difficulty, visual appeal and concept invention are distinct.
+
+Shortlist
+
+1. Ordered dots / Zip-style routing — best first implementation.
+   One path visits numbered cells in order, avoids walls, and covers the grid.
+   This is already a real game; we can generate our own boards. Start at 4x4
+   or 5x5. Wall edges follow Zip; blocked cells would be a declared adaptation.
+   Candidate concepts: a path has isolated unfinished cells, consumed a required
+   passage, or created a region with incompatible remaining entrances.
+   Example: a move advances toward dot 2 but cuts off dot 3 behind the trail.
+   These are candidate omitted properties, not an assertion that a connectivity
+   test completely characterizes solvability. Use an exact completion oracle.
+   Source: https://www.linkedin.com/help/linkedin/answer/a7445030
+
+2. Ricochet Robots — best familiar game for causal roles and abstraction.
+   Robots slide until an obstacle; another robot can supply a stopping point.
+   A small solo adaptation with two robots preserves this core mechanic.
+   Candidate concept: a blocking object can be an essential temporary brake.
+   Example: move the blue helper away from the goal so red can stop precisely
+   on it. A representation based only on the target robot can miss this.
+   Few rules and clear arrows; whole-state BFS can certify small boards.
+   Standard rules contain details such as counting helper moves; simplify
+   explicitly rather than calling the adaptation the full official game.
+   Sources: https://www.riograndegames.com/games/ricochet-robots/
+   https://www.riograndegames.com/wp-content/uploads/2013/02/RicochetRobots.pdf
+
+3. Numberlink — excellent visual control for multiple interacting routes.
+   Join equal-number pairs with disjoint grid paths. Candidate concepts:
+   a region separates a required pair; routing one pair consumes a shared
+   passage. Standard Nikoli rules do not require every cell to be filled;
+   Flow Free variants may, so freeze the exact variant.
+   Strong visual demo, but substantial existing topology-benchmark overlap.
+   Source: https://www.nikoli.co.jp/en/puzzles/numberlink/
+
+4. Slitherlink / Hashiwokakero — clearest global-versus-local logic tests.
+   Slitherlink requires one loop, not merely correct local edge counts.
+   Hashi requires one connected island network, not merely satisfied degrees.
+   Candidate omitted distinction: connectivity or premature component closure.
+   Easy small certificates; however these are established puzzle-eval domains.
+   Sources: https://www.nikoli.co.jp/en/puzzles/slitherlink/
+   https://www.nikoli.co.jp/en/puzzles/hashiwokakero/
+
+5. Peg solitaire — stronger alternative if we want invariant invention.
+   Each jump removes a peg. Ask for a computable invariant or obstruction,
+   and mechanically check its claimed scope against legal moves and small
+   exact reachability. This can require a derived concept rather than retaining
+   an explicitly provided state bit. Necessary conditions must not be graded
+   as sufficient: a valid invariant need not decide every reachable state.
+   Established mathematics supplies strong baselines; novelty needs separate
+   checking. A simple one-dimensional variant has known exact algorithms.
+   Source: https://arxiv.org/abs/math/0006067
+
+Other screened families
+
+Tsuro: tile paths compose into longer routes; a solo, fixed-tile adaptation
+  could test endpoint connectivity. Attractive, but rotation and port encoding
+  add presentation errors. https://calliopegames.com/13202/everything-you-need-to-know-about-tsuro/
+Rush Hour: vehicle dependencies and temporary space are intuitive. Good backup,
+  but failure can reduce to generic search. A publisher challenge generator
+  already exists. https://www.thinkfun.com/en-US/products/educational-games/rush-hour-76582
+  https://legacy.thinkfun.com/wp-content/themes/thinkfun/rush-hour-challenges/index.html
+Robo Rally: command sequences, orientation and board activation order are
+  interesting; the full game adds many mechanics. Use only a declared solo
+  subset, if needed. https://renegadegamestudios.com/robo-rally/
+Labyrinth: shifting maze rows changes connectivity. Visually appealing, but
+  implement a small deterministic solo subset for exact certification.
+  https://www.ravensburger.org/spielanleitungen/ecm/Spielanleitungen/Labyrinth_Labyrinth_26032_GB.pdf
+Quoridor: wall placement must preserve a route. Good global-connectivity
+  examples, but opponent strategy confounds minimal representation tests.
+  https://export.gigamic.com/wp-content/uploads/2021/01/INS-RULES-QUORIDOR_10-2016.pdf
+Go: repetition rules make history relevant even when stones look the same.
+  A clean history control, but learning an already stated repetition rule is
+  weak evidence of a new concept. https://www.usgo.org/content.aspx?club_id=454497&item_id=105706&page_id=5
+Chess: castling and en-passant depend on history beyond piece placement.
+  Useful sanity controls; too many familiar rules for the main tiny demo.
+  https://handbook.fide.com/chapter/E012023
+Hanabi: past hints constrain beliefs about hidden cards. Directly epistemic,
+  but cooperation and conventions complicate the exact target. Not first.
+  https://www.cocktailgames.com/wp-content/uploads/2016/03/Hanabi_regles_BD-1.pdf
+Sokoban: earlier local results already showed construction and prediction
+  bottlenecks. Use only as an existing control; do not restart that search.
+
+Novelty check: changing games is insufficient
+TopoBench already covers Loopy, Undead, Flow Free, Bridges, Galaxies and Pattern,
+with failure analysis, spatial-format interventions and constraint tools.
+https://arxiv.org/html/2603.12133v1
+Pencil Puzzle Bench already supplies step-level verification and multi-turn
+tool feedback across many puzzle families, including Slitherlink and Nurikabe.
+https://arxiv.org/html/2603.02119v1
+Therefore a new dots/loop/connectivity leaderboard or showing that tools help
+would overlap known work. The possible distinction is exposing a model-written
+abstraction's exact information loss and measuring prospective repair and
+transfer. That distinction is NOT established as novel by this game scan.
+
+Small next experiment, before building a large game suite
+Give complete structured observations plus a visual demo. Let the model write
+its own representation or shortcut. Search OFFLINE for two reachable states
+it merges despite different legal futures or completion outcomes. Validate
+both histories and outcomes. Compare repair from a precise distinguishing
+certificate with equally budgeted generic feedback; freeze new boards first.
+Do not label a necessary-condition feature a complete solver, force the model
+to forget state, or call a known connectivity rule an invented mathematical
+concept. If it writes a correct full-state solver immediately, stop that
+version rather than manufacture a failure by hiding needed observations.
+
+For dots: a pair of paths sharing the same head and next number can have
+different future options because their occupied cells differ. This refutes
+only a representation that actually merges those paths. It does not by itself
+show that a model made that mistake. That is the empirical gate to run next.

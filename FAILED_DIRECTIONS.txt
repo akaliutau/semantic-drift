@@ -107,6 +107,16 @@ Closed directions (15 November 2026)
     for directions 18/19 including interruption and token exhaustion:
     0.16772380 reported + 0.09014680 new uncertain credits. No winning claim.
 
+20. Selective refusal of executed counterexamples and exhaustive evidence:
+    Gemma again rejected two correct sorting programs; plain rechecking failed.
+    After native execution evidence it corrected both, while retaining the
+    correct rejection of a genuinely broken control. Qwen was correct across
+    all three stages. REJECT_THIS_VERSION under the frozen strong gate.
+    A zero-argument native-tool failure was explicitly repaired in a separately
+    sealed phase, preserving the first technical outcome and completed trials.
+    Nine calls total, 0.05001168 credits, no new uncertain billing. Do not scale.
+    EVIDENCE_REVISION_REPORT.txt; runs/evidence-revision-{1,2}.
+
 Retain: provider abstraction, streaming adapter, cross-process throttle and
 credit ledger, atomic receipts, presentation-tolerant parsing. Remove the old
 games, runners, elaborate plans and generated reports from the active tree.
