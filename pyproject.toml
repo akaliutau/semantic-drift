@@ -3,19 +3,20 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "selftrap"
-version = "0.2.0"
-description = "Mechanically checked experiments in self-specific prediction and diagnosis"
+name = "semantic-gate-audit"
+version = "1.0.0"
+description = "Paired tests of factual drift in semantic-preservation validation"
 requires-python = ">=3.12"
-dependencies = ["tqdm>=4.66", "python-dotenv>=1.0", "adaption>=0.19,<0.20"]
+dependencies = ["tqdm>=4.66", "python-dotenv>=1.0", "adaption>=0.19,<0.20", "httpx>=0.28"]
 
 [project.optional-dependencies]
 test = ["pytest>=8"]
-maze-demo = ["matplotlib>=3.8"]
-style-lab = ["numpy>=1.26", "scipy>=1.12", "scikit-learn>=1.5", "kaggle>=1.7", "six"]
+
+[project.scripts]
+semantic-audit = "pipeline.__main__:main"
 
 [tool.setuptools.packages.find]
-include = ["selftrap*"]
+include = ["pipeline*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

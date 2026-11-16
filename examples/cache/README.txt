@@ -1,0 +1,1 @@
+Three completed generation requests from the pre-confirmation construction stage. No judge outcomes are included. The local cache reuses them only for an identical request SHA256. Original passages/derivatives: Name That LLM, Yao Yan, Martyna Plomecka, Ashley Oldacre, Kaggle 2026, CC BY-SA 4.0.
